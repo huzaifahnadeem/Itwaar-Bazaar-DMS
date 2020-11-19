@@ -1,0 +1,3 @@
+1. in customer table. customer_id is not required. customer_email would work as primary key
+same for vendor, and govt table
+2. Add db_admins table (admin_email, admin_password, admin_name)

@@ -1,0 +1,33 @@
+customer table:
+
+name: 	huzaifah
+email:	hn@email.com
+pass:	huzi123
+
+
+vendor table:
+
+name: 	saad
+email:	ksm@email.com
+pass:	saad123
+
+name: 	huzaifah
+email:	hn@email.com
+pass:	huzi123
+
+
+officials table:
+
+name: 	mahen
+email:	mmm@email.com
+pass:	mahen123
+
+
+admins table:
+
+name: 	DB admin
+email:	admin@ibdms.com
+pass:	group03
+
+
+

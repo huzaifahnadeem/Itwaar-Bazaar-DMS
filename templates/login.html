@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>Log In | IBDMS</title>
+
+    <link href="../static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../static/css/style.css" rel="stylesheet">
+    <link href="../static/css/signin.css" rel="stylesheet">
+
+  </head>
+  <body class="text-center">
+    
+    
+    <form class="form-signin" method = "POST">
+      <img class="mb-4" src="../static/media/logo.bmp" alt="" width="72" height="72">
+        
+      {% if not c and not v and not o and not a %}
+      {% block content_Form %}
+  
+      <h1 class="h3 mb-3 font-weight-normal">Please Log In:</h1>
+    
+      <label for="inputEmail" class="sr-only">Email address</label>
+      <input type="email" name="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
+    
+      <label for="inputPassword" class="sr-only">Password</label>
+      <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required>
+        
+      <button class="btn btn-lg btn-primary btn-block" type="submit">Log In</button>
+      
+      <p class="text-danger">{{ error }}</p> 
+
+
+      {% endblock content_Form %}
+      {% endif %} 
+
+        
+        {% if c or v or o or a %}
+            {% block content_M %}
+        <h2 class="h3 mb-3 font-weight-normal">Multiple Accounts Detected for this email. Select One:</h1>
+          {% endblock content_M %}
+        {% endif %}
+        
+          {% if c %}
+            {% block content_c %}
+              <a href="/home/customer/{{email}}" class="btn btn-lg btn-secondary">Customer</a>
+            {% endblock content_c %}
+          {% endif %}
+           
+          {% if v %}
+            {% block content_v %}
+              <a href="/home/vendor/{{email}}" class="btn btn-lg btn-secondary">Vendor</a>
+            {% endblock %}
+          {% endif %}
+
+          {% if o %}
+            {% block content_o %}
+               <a href="/home/govt_official/{{email}}" class="btn btn-lg btn-secondary">Government Official</a>
+            {% endblock %}
+          {% endif %}
+          
+          {% if a %}
+            {% block content_a %}
+              <a href="/home/db_admin/{{email}}" class="btn btn-lg btn-secondary">Database Admin</a>         
+            {% endblock %}
+          {% endif %}
+        
+    </form>
+
+</body>
+</html>
