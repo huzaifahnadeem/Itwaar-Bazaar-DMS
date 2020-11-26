@@ -36,7 +36,6 @@ def login():
                     count += 1
 
             if count > 1:
-                # return redirect(url_for('multiple_accounts', c=accounts[0], v=accounts[1], o=accounts[2], a=accounts[3], email=email))
                 c=accounts[0]
                 v=accounts[1]
                 o=accounts[2]
@@ -84,8 +83,8 @@ def about():
 
 @app.route('/home/<acc_type>/<email>')
 def home(acc_type, email):
-    line = 'Account with email "' + email + '" successfully logged in as ' + acc_type + '. Rest of this page TODO in a later deliverable"'
-    return line
+    home_url = "/home/" + acc_type + "/" + email
+    return render_template('home.html', name=get_name(email,acc_type), home_url=home_url, acc_type=acc_type) 
 
 def add_account(name, email, password, acc_type):
     email = str(email).lower()
@@ -158,3 +157,43 @@ def find_account(email, password):
         to_return = False
 
     return to_return
+
+def get_name(email, acc_type):
+    # acc_type = "customer", "vendor", "govt_official", or "db_admin"
+    email = str(email).lower()
+    
+    conn = sqlite3.connect('IBDMS.db')
+    cur = conn.cursor()
+    
+    if acc_type == "customer":
+        cur.execute(
+        '''
+        select customer_name from customer where customer_email = ?;
+        ''', (email,)
+        )
+    elif acc_type == "vendor":
+        cur.execute(
+        '''
+        select vendor_name from vendor where vendor_email = ?;
+        ''', (email,)
+        )
+    elif acc_type == "govt_official":
+        cur.execute(
+        '''
+        select govt_off_name from government_officials where govt_off_email = ?;
+        ''', (email,)
+        )
+    elif acc_type == "db_admin":
+        cur.execute(
+        '''
+        select admin_name from db_admins where admin_email = ?;
+        ''', (email,)
+        )
+        
+    query_result = cur.fetchall()
+
+    conn.commit()
+    conn.close()
+
+    return query_result[0][0].title()
+
