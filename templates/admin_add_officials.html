@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <title>Home | IDBMS</title>
+    
+    <link rel="icon" href="{{ url_for('static', filename='media/logo.bmp') }}" type="image/gif" sizes="32x32">
+    
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/home.css') }}" rel="stylesheet">
+    
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+      <a class="navbar-brand" href="{{home_url}}"> <img src="{{ url_for('static', filename='media/logo.bmp') }}" width="35" height="35" alt="logo"></a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="nav-link" href="{{home_url}}"><button class="btn btn-outline-success my-2 my-sm-0" >Home</button></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{home_url}}/add_officials/"><button class="btn btn-outline-success my-2 my-sm-0">Add government official accounts</button><span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{home_url}}/remove_officials/"><button class="btn btn-outline-success my-2 my-sm-0">Remove government official accounts</button></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{home_url}}/query/"><button class="btn btn-outline-success my-2 my-sm-0">Query the Database</button></a>
+      </li>
+    </ul>
+    <a href="/"><button class="btn btn-success my-2 my-sm-0" >Sign Out</button></a>
+  </div>
+</nav>
+
+<main role="main" class="container">
+
+  <div class="starter-template">
+    <form class="form-signin" method = "POST">
+      <h1 class="h3 mb-3 font-weight-normal">Add a government official account:</h1>
+      
+      <label for="inputName" class="sr-only">Your Name</label>
+      <input type="name" name="name" id="inputName" class="form-control" placeholder="Full Name" required autofocus>
+    
+      <label for="inputEmail" class="sr-only">Email address</label>
+      <input type="email" name="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
+    
+      <label for="inputPassword" class="sr-only">Password</label>
+      <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required>
+        
+      <button class="btn btn-lg btn-success btn-block" type="submit">Add account</button>
+      
+      <p class="text-danger">{{ error }}</p> 
+      <p class="text-success">{{ success }}</p>  
+      
+    </form>
+  
+  </div>
+
+</main>
+
+<!-- javascript -->
+<!-- <script type="text/javascript" src="{{ url_for('static', filename='js/init.js') }}"></script> -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+      <script>window.jQuery || document.write('<script src="../assets/js/vendor/jquery.slim.min.js"><\/script>')</script><script src="../static/js/bootstrap.bundle.min.js"></script>
+</html>
