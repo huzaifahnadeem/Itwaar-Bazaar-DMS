@@ -1,75 +1,145 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    
-    <title>Home | IDBMS</title>
-    
-    <link rel="icon" href="{{ url_for('static', filename='media/logo.bmp') }}" type="image/gif" sizes="32x32">
-    
-    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/home.css') }}" rel="stylesheet">
-    
-  </head>
-  <body>
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-      <a class="navbar-brand" href="{{home_url}}"> <img src="{{ url_for('static', filename='media/logo.bmp') }}" width="35" height="35" alt="logo"></a>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
 
-  <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item active">
-        <a class="nav-link" href="{{home_url}}"><button class="btn btn-outline-success my-2 my-sm-0" >Home</button><span class="sr-only">(current)</span></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{home_url}}/add_time_location/"><button class="btn btn-outline-success my-2 my-sm-0">Add Time and Locations</button></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{home_url}}/remove_time_location/"><button class="btn btn-outline-success my-2 my-sm-0">Remove Time and Locations</button></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{home_url}}/statistics/"><button class="btn btn-outline-success my-2 my-sm-0">Statistics</button></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{home_url}}/price_bounds/"><button class="btn btn-outline-success my-2 my-sm-0">Manage Price Bounds</button></a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{home_url}}/fines/"><button class="btn btn-outline-success my-2 my-sm-0">Impose Fines</button></a>
-      </li>
-    </ul>
-    <a href="/"><button class="btn btn-success my-2 my-sm-0" >Sign Out</button></a>
-  </div>
-</nav>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-<main role="main" class="container">
+  <title>Home | IDBMS</title>
 
-  <div class="starter-template">
-    <form method = "POST">
-      <h1 class="h3 mb-3 font-weight-normal">Impose fines on vendors:</h1>
-      
+  <link rel="icon" href="{{ url_for('static', filename='media/logo.bmp') }}" type="image/gif" sizes="32x32">
+
+  <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/home.css') }}" rel="stylesheet">
+
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="{{home_url}}"> <img src="{{ url_for('static', filename='media/logo.bmp') }}"
+        width="35" height="35" alt="logo"></a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+      aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="{{home_url}}"><button
+              class="btn btn-outline-success my-2 my-sm-0">Home</button><span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{home_url}}/add_time_location/"><button
+              class="btn btn-outline-success my-2 my-sm-0">Add Time and Locations</button></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{home_url}}/remove_time_location/"><button
+              class="btn btn-outline-success my-2 my-sm-0">Remove Time and Locations</button></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{home_url}}/statistics/"><button
+              class="btn btn-outline-success my-2 my-sm-0">Statistics</button></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{home_url}}/price_bounds/"><button
+              class="btn btn-outline-success my-2 my-sm-0">Manage Price Bounds</button></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{home_url}}/fines/"><button class="btn btn-outline-success my-2 my-sm-0">Impose
+              Fines</button></a>
+        </li>
+      </ul>
+      <a href="/"><button class="btn btn-success my-2 my-sm-0">Sign Out</button></a>
+    </div>
+  </nav>
+
+
+  <main role="main" class="container">
+
+    <div class="starter-template">
+
+      {%if success != "" %}
+      <p class="text-success">{{ success }}</p>
+      {% endif %}
+
+      {%if error != "" %}
+      <p class="text-danger">{{ error }}</p>
+      {% endif %}
+
+      <!--make a form to take in item id,min and max price from user-->
+      <form method="post">
+
+        <h1 class="h3 mb-3 font-weight-normal"> Impose Fines</h1>
+        <br><br>
+
+        <!--The for attribute of <label> must be equal to the id attribute of the related element to bind them together.-->
+        <!--for & id should be same so that they are binded together-->
+        <!--name of input is used when pasing this form in app.py-->
+
+        <!-- select fine type.... -->
+        <div class="form-group">
+          <label for="type">Choose a fine:</label>
+          <select class="form-control" name="fineType" id="sel1">
+            <option value="priceFine">Impose Fine Due to Prices</option>
+            <option value="rentFine">Impose Fine Due to Rent Issues</option>
+          </select>
+        </div>
+        <br><br>
+
+        <!--fine ID-->
+        <label for="fineID" class="sr-only">Input Item ID</label>
+        <input type="text" name="fineID" id="fineID" class="form-control" placeholder="Fine ID" required autofocus>
+
+        <!--take vendor email....accessed by name in app.py-->
+        <label for="emailID" class="sr-only">Input Vendor's Email ID</label>
+        <input type="text" name="vendorEmail" id="emailID" class="form-control" placeholder="Vendor Email" required
+          autofocus>
+
+        <!--take fine details from user...accessed by name in app.py-->
+        <div class="form-group">
+          <label for="fineDetails">Fine Details:</label>
+          <textarea class="form-control" name="details" rows="5" id="fineDetails"></textarea>
+        </div>
+
+        <button class="btn btn-lg btn-success btn-block" type="submit">SUBMIT</button>
+      </form>
+      <br><br>
+
+
+      <h1 class="h3 mb-3 font-weight-normal"> Fines Table</h1>
+
+      <!-- print allItems list argument....each element of list is a complete row(in a tuple) -->
+      <!--CONVERT THIS PRINT INTO A GOOD LOOKING TABLE-->
+      <!-- {% for your_list_element in finesData %}
+      <p>{{ your_list_element }} </p>
+      {% endfor %} -->
+
       <table class="table table-striped">
-        {% for i in accounts_list %}
         <tr>
-          {% for j in i %}
-          <td> {{j}} </td>
-          <td> <input placeholder="fine amount"> </td>
-          <td> <button class="btn btn-sm btn-success btn-block" type="submit" name="{{j}}">Impose</button> </td>
+          <th>Fine ID</th>
+          <th>Vendor Email Name</th>
+        </tr>
+
+        {% for currTuple in finesData %}
+        <tr>
+          {% for currElement in currTuple %}
+          <td> {{currElement}} </td>
           {% endfor %}
         </tr>
         {% endfor %}
+
       </table>
-      {{error}}
-      {{success}}
-    </form>
-  </div>
 
-</main>
 
-<!-- javascript -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-      <script>window.jQuery || document.write('<script src="../assets/js/vendor/jquery.slim.min.js"><\/script>')</script><script src="../static/js/bootstrap.bundle.min.js"></script>
+    </div>
+
+  </main>
+
+  <!-- javascript -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script>window.jQuery || document.write('<script src="../assets/js/vendor/jquery.slim.min.js"><\/script>')</script>
+  <script src="../static/js/bootstrap.bundle.min.js"></script>
+
 </html>
