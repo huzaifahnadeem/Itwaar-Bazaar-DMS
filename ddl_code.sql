@@ -30,7 +30,9 @@ create table location (
     x_coordinate    real,   
     y_coordinate    real,
     shop_number     int,
-    primary key (location_id)
+    time_slot_id    int,
+    primary key (location_id),
+    foreign key (time_slot_id) references time_slot (time_slot_id)
 );
 
 create table customer (

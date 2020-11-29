@@ -48,12 +48,30 @@
 <main role="main" class="container">
 
   <div class="starter-template">
-    <h1>TODO</h1>
+    <form class="form-signin" method = "POST">
+      <h1 class="h3 mb-3 font-weight-normal">Add a stall location with time slot:</h1>
+      
+      <label for="shop_num_input" class="sr-only">Shop number:</label>
+      <input type="number" onkeypress="return event.charCode >= 48" min="0" name="shop_num" id="shop_num_input" placeholder="Shop Number" class="form-control" required autofocus>
+    
+      <label for="st-time_input" class="sr-only">Start time:</label>
+      <input type="time" name="st-time" id="st-time_input" class="form-control" required autofocus>
+    
+      <label for="en-time_input" class="sr-only">End time:</label>
+      <input type="time" name="en-time" id="en-time_input" class="form-control" required autofocus>
+        
+      <button class="btn btn-lg btn-success btn-block" type="submit">Add</button>
+      
+      <p class="text-danger">{{ error }}</p> 
+      <p class="text-success">{{ success }}</p>  
+      
+    </form>
+  
   </div>
 
 </main>
 
 <!-- javascript -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-      <script>window.jQuery || document.write('<script src="../assets/js/vendor/jquery.slim.min.js"><\/script>')</script><script src="../static/js/bootstrap.bundle.min.js"></script>
+      <script>window.jQuery || document.write('<script src="../assets/js/vendor/jquery.slim.min.js"><\/script>')</script><script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 </html>
