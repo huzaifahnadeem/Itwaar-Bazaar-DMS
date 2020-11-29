@@ -15,13 +15,14 @@ create table stall (
 );
 
 create table promotions (
+    promotion_id    int,
     customer_id     int,
     vendor_id       int,    
     details         varchar(500),
     ended           boolean,    
     foreign key (customer_id) references customer (customer_id),
     foreign key (vendor_id) references vendor (vendor_id),
-    primary key (customer_id, vendor_id)    
+    primary key (promotion_id)    
 );
 
 create table location (
