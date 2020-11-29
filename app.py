@@ -124,16 +124,17 @@ def add_time_location(email):
     error = ""
     success = ""
 
-    if request.method == 'POST':  
+    if request.method == 'POST':
         shop_num = request.form['shop_num']
         st_time = request.form['st-time']
         en_time = request.form['en-time']
 
-        start_time = datetime.datetime.strptime(st_time,"%H:%M") # convert string to time
-        end_time = datetime.datetime.strptime(en_time,"%H:%M") 
+        start_time = datetime.datetime.strptime(
+            st_time, "%H:%M")  # convert string to time
+        end_time = datetime.datetime.strptime(en_time, "%H:%M")
         diff = end_time - start_time
         delta = diff.total_seconds()
-        
+
         if (delta < 0):
             error = "End time cannot be before start time."
         else:
@@ -141,7 +142,8 @@ def add_time_location(email):
             if error == "":
                 success = "Time and location added successfully"
 
-    return render_template('official_add_time_location.html', home_url = "/home/govt_official/" + email, success=success, error=error) 
+    return render_template('official_add_time_location.html', home_url="/home/govt_official/" + email, success=success, error=error)
+
 
 @app.route('/home/govt_official/<email>/remove_time_location/', methods=['POST', 'GET'])
 def remove_time_location(email):
@@ -150,9 +152,9 @@ def remove_time_location(email):
 
     list_of_shops_and_times = get_all_shops_with_slots()
 
-    if request.method == 'POST':  
+    if request.method == 'POST':
         time_ID_to_remove = request.form['ID']
-        
+
         exists = False
         for i in list_of_shops_and_times:
             for j in i:
@@ -161,15 +163,17 @@ def remove_time_location(email):
         if exists == False:
             error = "The entered ID does not exist. "
         else:
-            query = "delete from location where time_slot_id = " + str(time_ID_to_remove) + ";"
+            query = "delete from location where time_slot_id = " + \
+                str(time_ID_to_remove) + ";"
             _, error = execute_query(query)
 
-            if error == "":   
-                success = "Shop given time slot with id " + str(time_ID_to_remove) + " removed successfully."
+            if error == "":
+                success = "Shop given time slot with id " + \
+                    str(time_ID_to_remove) + " removed successfully."
                 list_of_shops_and_times = get_all_shops_with_slots()
-                return render_template('official_remove_time_location.html', home_url = "/home/govt_official/" + email, list_of_shops_and_times=list_of_shops_and_times, error=error, success=success) 
+                return render_template('official_remove_time_location.html', home_url="/home/govt_official/" + email, list_of_shops_and_times=list_of_shops_and_times, error=error, success=success)
 
-    return render_template('official_remove_time_location.html', home_url = "/home/govt_official/" + email, list_of_shops_and_times=list_of_shops_and_times, error=error, success=success) 
+    return render_template('official_remove_time_location.html', home_url="/home/govt_official/" + email, list_of_shops_and_times=list_of_shops_and_times, error=error, success=success)
 
 
 @app.route('/home/govt_official/<email>/price_bounds/', methods=['POST', 'GET'])
@@ -263,12 +267,13 @@ def impose_fines(email):
     error = ""
     success = ""
 
-    finesQuery = "select fine_id , vendor_email from fines"
+    finesQuery = "select * from fines"
     # resultOfQuery is a list containing all tuples (comma separated) corresponding to our query.
     resultOfQuery, error = execute_query(finesQuery)
 
     if request.method == 'POST':
-        requestFineId = int(request.form['fineID'])
+        # requestFineId = int(request.form['fineID'])
+        requestFineId = 0
         requestVendorEmail = request.form['vendorEmail']
         requestVendorEmail = str(requestVendorEmail).lower()
         requestFineDetails = request.form['details']
@@ -289,19 +294,12 @@ def impose_fines(email):
             error = "There does not exist a vendor with the given Email ID."
             return render_template('official_fines.html', home_url="/home/govt_official/" + email, finesData=resultOfQuery, error=error, success=success)
 
-        # check if Fine id is valid (should not exist)
-        fineIDExists = False
-        for currRow in resultOfQuery:
-            tempID = currRow[0]
-            if tempID == requestFineId:
-                fineIDExists = True
-                break
+        # compute findID
+        myQuery = "select COALESCE(MAX(fine_id), 0) from fines"
+        tempResult, error = execute_query(myQuery)
+        requestFineId = tempResult[0][0] + 1
 
-        if fineIDExists:
-            error = "There exists a fine with same fine ID. Retry with a new one"
-            return render_template('official_fines.html', home_url="/home/govt_official/" + email, finesData=resultOfQuery, error=error, success=success)
-
-        # at this point vendor email ID and fineId that were input by the user are correct so we run the query and add fine
+        # at this point vendor email ID  is valid that was input by the user so we run the query and add fine
 
         conn = sqlite3.connect('IBDMS.db')
         cur = conn.cursor()
@@ -312,9 +310,9 @@ def impose_fines(email):
         )
         conn.commit()
         conn.close()
-
+        # get updated fines table
         error2 = ""
-        finesQuery = "select fine_id , vendor_email from fines"
+        finesQuery = "select * from fines"
         # resultOfQuery is a list containing all tuples (comma separated) corresponding to our query.
         resultOfQuery, error2 = execute_query(finesQuery)
         success = "Fine Added Successfully !"
@@ -364,7 +362,7 @@ def remove_officials(email):
 
         message = 'Account with email "' + email_to_remove + '" has been removed.'
         accounts_list = all_accounts("govt_official")
-        return render_template('admin_remove_officials.html', home_url = "/home/db_admin/" + email, accounts_list=accounts_list, message=message) 
+        return render_template('admin_remove_officials.html', home_url="/home/db_admin/" + email, accounts_list=accounts_list, message=message)
 
     return render_template('admin_remove_officials.html', home_url="/home/db_admin/" + email, accounts_list=accounts_list, message=message)
 
@@ -374,10 +372,11 @@ def query_form(email):
     query_result = ""
     error = ""
     if request.method == 'POST':
-            query = request.form['query']
-            (query_result, error) = execute_query(query)
+        query = request.form['query']
+        (query_result, error) = execute_query(query)
 
-    return render_template('admin_query.html', home_url = "/home/db_admin/" + email, query_result=query_result, error=error) 
+    return render_template('admin_query.html', home_url="/home/db_admin/" + email, query_result=query_result, error=error)
+
 
 def add_account(name, email, password, acc_type):
     """
@@ -590,6 +589,7 @@ def all_accounts(acc_type):
 
     return result
 
+
 def insert_location_time(st_time, en_time, shop_num_str):
     """
     Inserts tuples into location and time_slot tables with the given values.
@@ -603,13 +603,13 @@ def insert_location_time(st_time, en_time, shop_num_str):
     shop_num = int(shop_num_str)
     query_result = []
     error = ""
-    
+
     try:
         conn = sqlite3.connect('IBDMS.db')
         cur = conn.cursor()
-        
+
         cur.execute(
-        '''
+            '''
         SELECT MAX(location_id)
         FROM location;
         '''
@@ -621,7 +621,7 @@ def insert_location_time(st_time, en_time, shop_num_str):
             this_location_id = int(this_location_id[0][0]) + 1
 
         cur.execute(
-        '''
+            '''
         SELECT MAX(time_slot_id)
         FROM time_slot;
         '''
@@ -633,7 +633,7 @@ def insert_location_time(st_time, en_time, shop_num_str):
             this_time_slot_id = int(this_time_slot_id[0][0]) + 1
 
         cur.execute(
-        '''
+            '''
         INSERT INTO time_slot (time_slot_id, start_time, end_time)
         VALUES (?, ?, ?);
         ''', (this_time_slot_id, st_time, en_time)
@@ -642,7 +642,7 @@ def insert_location_time(st_time, en_time, shop_num_str):
         query_result.append(cur.fetchall())
 
         cur.execute(
-        '''
+            '''
         INSERT INTO location (location_id, shop_number, time_slot_id)
         VALUES (?, ?, ?);
         ''', (this_location_id, shop_num, this_time_slot_id)
@@ -657,6 +657,7 @@ def insert_location_time(st_time, en_time, shop_num_str):
 
     return error
 
+
 def get_all_shops_with_slots():
     """
     returns a list of all shops with their time slots.
@@ -666,13 +667,13 @@ def get_all_shops_with_slots():
 
     query_result = []
     error = ""
-    
+
     try:
         conn = sqlite3.connect('IBDMS.db')
         cur = conn.cursor()
 
         cur.execute(
-        '''
+            '''
         SELECT location.time_slot_id, shop_number, start_time, end_time
         FROM time_slot INNER JOIN location
         ON time_slot.time_slot_id = location.time_slot_id

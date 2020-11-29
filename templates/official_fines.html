@@ -72,7 +72,6 @@
       <form method="post">
 
         <h1 class="h3 mb-3 font-weight-normal"> Impose Fines</h1>
-        <br><br>
 
         <!--The for attribute of <label> must be equal to the id attribute of the related element to bind them together.-->
         <!--for & id should be same so that they are binded together-->
@@ -80,27 +79,23 @@
 
         <!-- select fine type.... -->
         <div class="form-group">
-          <label for="type">Choose a fine:</label>
+          <label for="type"></label>
           <select class="form-control" name="fineType" id="sel1">
             <option value="priceFine">Impose Fine Due to Prices</option>
             <option value="rentFine">Impose Fine Due to Rent Issues</option>
           </select>
         </div>
-        <br><br>
-
-        <!--fine ID-->
-        <label for="fineID" class="sr-only">Input Item ID</label>
-        <input type="text" name="fineID" id="fineID" class="form-control" placeholder="Fine ID" required autofocus>
 
         <!--take vendor email....accessed by name in app.py-->
-        <label for="emailID" class="sr-only">Input Vendor's Email ID</label>
+        <label for="emailID" class="sr-only"></label>
         <input type="text" name="vendorEmail" id="emailID" class="form-control" placeholder="Vendor Email" required
           autofocus>
 
         <!--take fine details from user...accessed by name in app.py-->
         <div class="form-group">
-          <label for="fineDetails">Fine Details:</label>
-          <textarea class="form-control" name="details" rows="5" id="fineDetails"></textarea>
+          <label for="fineDetails"></label>
+          <textarea class="form-control" name="details" rows="5" id="fineDetails"
+            placeholder="Entrer Fine Details..."></textarea>
         </div>
 
         <button class="btn btn-lg btn-success btn-block" type="submit">SUBMIT</button>
@@ -112,14 +107,13 @@
 
       <!-- print allItems list argument....each element of list is a complete row(in a tuple) -->
       <!--CONVERT THIS PRINT INTO A GOOD LOOKING TABLE-->
-      <!-- {% for your_list_element in finesData %}
-      <p>{{ your_list_element }} </p>
-      {% endfor %} -->
-
       <table class="table table-striped">
         <tr>
           <th>Fine ID</th>
-          <th>Vendor Email Name</th>
+          <th>Issued By</th>
+          <th>Issued To</th>
+          <th>Details</th>
+          <th>Status (Paid = 1 , Unpaid = 0)</th>
         </tr>
 
         {% for currTuple in finesData %}
@@ -139,6 +133,7 @@
 
   <!-- javascript -->
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-      <script>window.jQuery || document.write('<script src="../assets/js/vendor/jquery.slim.min.js"><\/script>')</script><script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+  <script>window.jQuery || document.write('<script src="../assets/js/vendor/jquery.slim.min.js"><\/script>')</script>
+  <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 
 </html>
