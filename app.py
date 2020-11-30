@@ -101,20 +101,128 @@ def home(acc_type, email):
     home_url = "/home/" + acc_type + "/" + email
 
     if acc_type == "customer":
-        return "TODO"
+        return render_template('home_customer.html', name=get_name(email, acc_type), home_url=home_url)
     elif acc_type == "vendor":
-        return "TODO"
+        return render_template('home_vendor.html', name=get_name(email, acc_type), home_url=home_url)
     elif acc_type == "govt_official":
         return render_template('home_official.html', name=get_name(email, acc_type), home_url=home_url)
     elif acc_type == "db_admin":
         return render_template('home_admin.html', name=get_name(email, acc_type), home_url=home_url)
 
 
-# Customer Screens:
-# TODO
-
 # Vendor Screens:
-# TODO
+
+@app.route('/home/vendor/<email>/add_stock/', methods=['POST', 'GET'])
+def vendor_stock_add(email):
+    # TODO
+    error = ""
+    success = ""
+
+    if request.method == 'POST':
+        pass
+
+    return render_template('vendor_stock_add.html', home_url="/home/vendor/" + email, success=success, error=error)
+
+@app.route('/home/vendor/<email>/view_stock/', methods=['POST', 'GET'])
+def vendor_stock_view(email):
+    # TODO
+    error = ""
+    success = ""
+
+    if request.method == 'POST':
+        pass
+
+    return render_template('vendor_stock_view.html', home_url="/home/vendor/" + email, success=success, error=error)
+
+@app.route('/home/vendor/<email>/update_stock/', methods=['POST', 'GET'])
+def vendor_stock_update(email):
+    # TODO
+    error = ""
+    success = ""
+
+    if request.method == 'POST':
+        pass
+
+    return render_template('vendor_stock_update.html', home_url="/home/vendor/" + email, success=success, error=error)
+
+@app.route('/home/vendor/<email>/remove_stock/', methods=['POST', 'GET'])
+def vendor_stock_remove(email):
+    # TODO
+    error = ""
+    success = ""
+
+    if request.method == 'POST':
+        pass
+
+    return render_template('vendor_stock_remove.html', home_url="/home/vendor/" + email, success=success, error=error)
+
+@app.route('/home/vendor/<email>/view_sales/', methods=['POST', 'GET'])
+def vendor_sales(email):
+    # TODO
+    error = ""
+    success = ""
+
+    if request.method == 'POST':
+        pass
+
+    return render_template('vendor_sales.html', home_url="/home/vendor/" + email, success=success, error=error)
+
+@app.route('/home/vendor/<email>/promotions/', methods=['POST', 'GET'])
+def vendor_promotions(email):
+    # TODO
+    error = ""
+    success = ""
+
+    if request.method == 'POST':
+        pass
+
+    return render_template('vendor_promos.html', home_url="/home/vendor/" + email, success=success, error=error)
+
+@app.route('/home/vendor/<email>/rent/', methods=['POST', 'GET'])
+def vendor_rent(email):
+    # TODO
+    error = ""
+    success = ""
+
+    if request.method == 'POST':
+        pass
+
+    return render_template('vendor_rent.html', home_url="/home/vendor/" + email, success=success, error=error)
+
+# Customer Screens:
+
+@app.route('/home/customer/<email>/search_items/', methods=['POST', 'GET'])
+def customer_search_items(email):
+    # TODO
+    error = ""
+    success = ""
+
+    if request.method == 'POST':
+        pass
+
+    return render_template('customer_search_item.html', home_url="/home/customer/" + email, success=success, error=error)
+
+@app.route('/home/customer/<email>/req_items/', methods=['POST', 'GET'])
+def customer_req_items(email):
+    # TODO
+    error = ""
+    success = ""
+
+    if request.method == 'POST':
+        pass
+
+    return render_template('customer_req_item.html', home_url="/home/customer/" + email, success=success, error=error)
+
+@app.route('/home/customer/<email>/cart/', methods=['POST', 'GET'])
+def customer_cart(email):
+    # TODO
+    error = ""
+    success = ""
+
+    if request.method == 'POST':
+        pass
+
+    return render_template('customer_cart.html', home_url="/home/customer/" + email, success=success, error=error)
 
 # Govt Official screens:
 
@@ -233,26 +341,6 @@ def price_bounds(email):
             return render_template('official_prices.html', home_url="/home/govt_official/" + email, allItems=allItems, error=error, success=success)
 
     return render_template('official_prices.html', home_url="/home/govt_official/" + email, allItems=allItems, error=error, success=success)
-
-
-def getAllItems():
-    result = []
-
-    conn = sqlite3.connect('IBDMS.db')
-    cur = conn.cursor()
-    cur.execute(
-        '''
-            select * from items;
-            '''
-    )
-
-    result = cur.fetchall()
-
-    conn.commit()
-    conn.close()
-
-    return result
-
 
 @app.route('/home/govt_official/<email>/statistics/', methods=['POST', 'GET'])
 def statistics(email):
@@ -689,3 +777,27 @@ def get_all_shops_with_slots():
         error = str(sys.exc_info()[1])
 
     return (query_result, error)
+
+
+def getAllItems():
+    """
+    returns a list of all items.
+
+    @:return: list: list of all items
+    """
+    result = []
+
+    conn = sqlite3.connect('IBDMS.db')
+    cur = conn.cursor()
+    cur.execute(
+        '''
+            select * from items;
+            '''
+    )
+
+    result = cur.fetchall()
+
+    conn.commit()
+    conn.close()
+
+    return result
