@@ -457,13 +457,19 @@ def remove_officials(email):
 
 @app.route('/home/db_admin/<email>/query/', methods=['POST', 'GET'])
 def query_form(email):
+    query = ""
     query_result = ""
+    col_names = ""
     error = ""
+
     if request.method == 'POST':
         query = request.form['query']
-        (query_result, error) = execute_query(query)
+        (col_names, query_result, error) = execute_query(query)
 
-    return render_template('admin_query.html', home_url="/home/db_admin/" + email, query_result=query_result, error=error)
+        for i in range(len(col_names)):
+            col_names[i] = col_names[i].title()
+
+    return render_template('admin_query.html', home_url="/home/db_admin/" + email, query_result=query_result, error=error, query=query, col_names=col_names)
 
 
 def add_account(name, email, password, acc_type):
@@ -622,12 +628,14 @@ def execute_query(query):
     """
     error = ""
     result = []
+    names = []
+
     try:
         conn = sqlite3.connect('IBDMS.db', detect_types=sqlite3.PARSE_COLNAMES)
         cur = conn.cursor()
 
-        # cur.execute('''.headers on''')
         cur.execute(query)
+        names = list(map(lambda x: x[0], cur.description))
         result = cur.fetchall()
 
         conn.commit()
@@ -636,7 +644,7 @@ def execute_query(query):
     except:
         error = str(sys.exc_info()[1])
 
-    return (result, error)
+    return (names, result, error)
 
 
 def all_accounts(acc_type):

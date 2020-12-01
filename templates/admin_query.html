@@ -23,13 +23,16 @@
   <div class="collapse navbar-collapse" id="navbarsExampleDefault">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item active">
-        <a class="nav-link" href="{{home_url}}"><button class="btn btn-outline-success my-2 my-sm-0" >Home</button></a>
+        <a class="nav-link" href="{{home_url}}"><button class="btn btn-outline-success my-2 my-sm-0" >Home</button><span class="sr-only">(current)</span></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="{{home_url}}/manage_officials/"><button class="btn btn-outline-success my-2 my-sm-0">Manage government official accounts</button></a>
+        <a class="nav-link" href="{{home_url}}/add_officials/"><button class="btn btn-outline-success my-2 my-sm-0">Add government official accounts</button></a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="{{home_url}}/query/"><button class="btn btn-outline-success my-2 my-sm-0">Query the Database</button><span class="sr-only">(current)</span></a>
+        <a class="nav-link" href="{{home_url}}/remove_officials/"><button class="btn btn-outline-success my-2 my-sm-0">Remove government official accounts</button></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{home_url}}/query/"><button class="btn btn-outline-success my-2 my-sm-0">Query the Database</button></a>
       </li>
     </ul>
     <a href="/"><button class="btn btn-success my-2 my-sm-0" >Sign Out</button></a>
@@ -43,12 +46,17 @@
     <div class="form-group">
       <h1 class="starter-template">Query the Database:</h1>
       <label for="sql-commands-textarea">Enter Commands Here:</label>
-      <textarea class="form-control" id="sql-commands-textarea" rows="6" placeholder="SELECT ... FROM ... WHERE ... ;" name="query"></textarea> <br>
+      <textarea class="form-control" id="sql-commands-textarea" rows="6" placeholder="SELECT ... FROM ... WHERE ... ;" name="query">{{query}}</textarea> <br>
       <button class="btn btn-lg btn-success btn-block" type="submit">Execute</button>
     </div>
   </form>
     <p class="text-danger">{{error}}</p>
   <table class="table table-hover">
+    <tr>
+      {% for x in col_names %}
+        <th>{{x}}</th>
+      {% endfor %}
+    </tr>
     {% for i in query_result %}
     <tr>
       {% for j in i %}
