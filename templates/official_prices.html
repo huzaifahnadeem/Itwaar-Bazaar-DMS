@@ -72,20 +72,28 @@
       <!--make a form to take in item id,min and max price from user-->
       <form method="post">
 
-        <h1 class="h3 mb-3 font-weight-normal"> Update Allowed Price Range</h1>
+        <h1 class="h3 mb-3 font-weight-normal"> Items & Price Bounds</h1>
         <!--The for attribute of <label> must be equal to the id attribute of the related element to bind them together.-->
         <!--for & id should be same so that they are binded together-->
         <!--name of input is used when pasing this form in app.py-->
-        <label for="itemId" class="sr-only">Item ID</label>
-        <input type="text" name="itemId" id="itemId" class="form-control" placeholder="Item ID" required autofocus>
 
-        <label for="inputMinPrice" class="sr-only">Min Price</label>
-        <input type="text" name="inputMinPrice" id="inputMinPrice" class="form-control" placeholder="Min Price" required
+        <label for="itemName" class="sr-only">Item Name</label>
+        <input type="text" name="itemName" id="itemName" class="form-control" placeholder="Item Name" required
+          autofocus>
+
+        <label for="itemCat" class="sr-only">Item Category</label>
+        <input type="text" name="itemCat" id="itemCat" class="form-control" placeholder="Item Category" required
           autofocus>
 
         <label for="inputMaxPrice" class="sr-only">Max Price</label>
         <input type="text" name="inputMaxPrice" id="inputMaxPrice" class="form-control" placeholder="Max Price" required
           autofocus>
+
+
+        <label for="inputMinPrice" class="sr-only">Min Price</label>
+        <input type="text" name="inputMinPrice" id="inputMinPrice" class="form-control" placeholder="Min Price" required
+          autofocus>
+
 
         <button class="btn btn-lg btn-success btn-block" type="submit">UPDATE</button>
       </form>
@@ -97,7 +105,7 @@
       <!--CONVERT THIS PRINT INTO A GOOD LOOKING TABLE-->
       <table class="table table-striped">
         <tr>
-          <th>Item ID</th>
+          <!-- <th>Item ID</th> -->
           <th>Item Name</th>
           <th>Item Category</th>
           <th>Max Price</th>
@@ -120,6 +128,7 @@
 
   <!-- javascript -->
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-      <script>window.jQuery || document.write('<script src="../assets/js/vendor/jquery.slim.min.js"><\/script>')</script><script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+  <script>window.jQuery || document.write('<script src="../assets/js/vendor/jquery.slim.min.js"><\/script>')</script>
+  <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 
 </html>

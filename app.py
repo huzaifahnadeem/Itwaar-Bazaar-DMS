@@ -3,6 +3,8 @@ import sqlite3
 import sys      # for error catching
 import datetime
 
+from werkzeug.datastructures import RequestCacheControl
+
 app = Flask(__name__)
 
 if __name__ == '__main__':
@@ -112,16 +114,106 @@ def home(acc_type, email):
 
 # Vendor Screens:
 
+def extractNameAndCategory(allItems):
+    retList = []  # list of tuples where each tuple contains item_name, item_category
+
+    for currRow in allItems:
+        tempTuple = (currRow[0], currRow[1])
+        retList.append(tempTuple)
+
+    return retList
+
+
 @app.route('/home/vendor/<email>/add_stock/', methods=['POST', 'GET'])
 def vendor_stock_add(email):
-    # TODO
+    # The system asks the vendor to tell it item name that it wants to sell (all of possible items that can be sold will be shown)
+    # Vendor inputs the item name,selling price,quantity
+    # give an output message if price is OUT OF ALLOWED BOUND (but still accept the entry)
+
     error = ""
     success = ""
 
-    if request.method == 'POST':
-        pass
+    allItems = getAllItems()
+    # itemData = extractNameAndCategory(allItems)
 
-    return render_template('vendor_stock_add.html', home_url="/home/vendor/" + email, success=success, error=error)
+    if request.method == 'POST':
+        requestItemName = request.form['itemName']
+        requestSellingPrice = float(request.form['sellingPrice'])
+        requestQuantity = int(request.form['quantity'])
+
+        if requestQuantity <= 0:
+            error = "Quantity should be a positive value."
+            return render_template('vendor_stock_add.html', home_url="/home/vendor/" + email, itemData=allItems, success=success, error=error)
+
+        if requestSellingPrice <= 0:
+            error = "Selling price should be a positive value."
+            return render_template('vendor_stock_add.html', home_url="/home/vendor/" + email, itemData=allItems, success=success, error=error)
+
+        validItemName = False
+        matchedData = []  # will have one matched row from items table corresponding to the item name input by the user trying to add stock
+        for currRow in allItems:
+            tempName = currRow[0]
+            if tempName == requestItemName:
+                validItemName = True
+                matchedData = currRow
+                break
+
+        # here
+        if validItemName:  # item will be added. Either updated or newly added
+            itemMinPrice = matchedData[3]
+            itemMaxPrice = matchedData[2]
+
+            if requestSellingPrice > itemMinPrice:
+                error = "Selling price is more than maximum allowed price. You will be fined !"
+            if requestSellingPrice < itemMinPrice:
+                error = "Selling price is less than minimum allowed price. You will be fined !"
+
+            # check if this vendor is already selling the item or not?
+            conn = sqlite3.connect('IBDMS.db')
+            cur = conn.cursor()
+            myQuery = """ SELECT EXISTS(SELECT 1 FROM overall_stock WHERE item_name= ? AND vendor_email = ?) """
+            resultTuple = cur.execute(myQuery,
+                                      (requestItemName, email)).fetchone()
+            conn.commit()
+            conn.close()
+
+            alreadySelling = resultTuple[0]
+
+            if alreadySelling == 1:  # need to update stock
+                conn = sqlite3.connect('IBDMS.db')
+                cur = conn.cursor()
+
+                myQuery = """UPDATE overall_stock SET selling_price = ?, quantity = ? WHERE item_name = ? AND vendor_email = ? """
+                cur.execute(myQuery,
+                            (requestSellingPrice, requestQuantity, requestItemName, email))
+
+                conn.commit()
+                conn.close()
+
+                success = "Stock Updated!"
+
+            else:  # need to add stock
+
+                conn = sqlite3.connect('IBDMS.db')
+                cur = conn.cursor()
+                myQuery = """INSERT INTO overall_stock (item_name,vendor_email,selling_price,quantity) VALUES ( ?,?,?,?)"""
+                cur.execute(myQuery, (requestItemName, email,
+                                      requestSellingPrice, requestQuantity))
+
+                conn.commit()
+                conn.close()
+                success = "New Stock Added"
+
+                # allItems = getAllItems()
+                # itemData = extractNameAndCategory(allItems) #updated list of items
+
+            return render_template('vendor_stock_add.html', home_url="/home/vendor/" + email, itemData=allItems, success=success, error=error)
+        else:
+            error = "This item cannot be sold. Item not present in list of allowed items that can be sold."
+            return render_template('vendor_stock_add.html', home_url="/home/vendor/" + email, itemData=allItems, success=success, error=error)
+
+    return render_template('vendor_stock_add.html', home_url="/home/vendor/" + email, itemData=allItems, success=success, error=error)
+
 
 @app.route('/home/vendor/<email>/view_stock/', methods=['POST', 'GET'])
 def vendor_stock_view(email):
@@ -134,27 +226,61 @@ def vendor_stock_view(email):
 
     return render_template('vendor_stock_view.html', home_url="/home/vendor/" + email, success=success, error=error)
 
-@app.route('/home/vendor/<email>/update_stock/', methods=['POST', 'GET'])
-def vendor_stock_update(email):
-    # TODO
-    error = ""
-    success = ""
-
-    if request.method == 'POST':
-        pass
-
-    return render_template('vendor_stock_update.html', home_url="/home/vendor/" + email, success=success, error=error)
 
 @app.route('/home/vendor/<email>/remove_stock/', methods=['POST', 'GET'])
 def vendor_stock_remove(email):
-    # TODO
+
     error = ""
     success = ""
 
-    if request.method == 'POST':
-        pass
+    conn = sqlite3.connect('IBDMS.db')
+    cur = conn.cursor()
+    myQuery = """ SELECT vendor_name from vendor WHERE vendor_email = ? """
+    resultTuple = cur.execute(myQuery, (email,)).fetchone()
 
-    return render_template('vendor_stock_remove.html', home_url="/home/vendor/" + email, success=success, error=error)
+    # get all item_names present in over my complete stock
+    myQuery = """ SELECT item_name from overall_stock WHERE vendor_email = ? """
+    resultList = cur.execute(myQuery, (email,)).fetchall()
+
+    conn.commit()
+    conn.close()
+    myName = str(resultTuple[0]).title()
+
+    # get name corresponding to email
+
+    if request.method == 'POST':
+        requestItemName = request.form['itemName']
+        # check if item to delete exists in my stock or not
+        validItemName = False
+        for currRow in resultList:
+            tempName = currRow[0]
+            if tempName == requestItemName:
+                validItemName = True
+                break
+
+        if validItemName:
+            # delete stock
+            # get updated items in my stock
+
+            conn = sqlite3.connect('IBDMS.db')
+            cur = conn.cursor()
+            myQuery = """ DELETE from overall_stock WHERE vendor_email = ? AND item_name = ? """
+            cur.execute(
+                myQuery, (email, requestItemName)).fetchall()
+
+            # get all item_names present in over my complete stock
+            myQuery = """ SELECT item_name from overall_stock WHERE vendor_email = ? """
+            resultList = cur.execute(myQuery, (email,)).fetchall()
+
+            conn.commit()
+            conn.close()
+            success = "Deletion Successful."
+
+        else:
+            error = "Item does not exist in your stock."
+
+    return render_template('vendor_stock_remove.html', home_url="/home/vendor/" + email, itemData=resultList, myName=myName, success=success, error=error)
+
 
 @app.route('/home/vendor/<email>/view_sales/', methods=['POST', 'GET'])
 def vendor_sales(email):
@@ -167,6 +293,7 @@ def vendor_sales(email):
 
     return render_template('vendor_sales.html', home_url="/home/vendor/" + email, success=success, error=error)
 
+
 @app.route('/home/vendor/<email>/promotions/', methods=['POST', 'GET'])
 def vendor_promotions(email):
     # TODO
@@ -177,6 +304,7 @@ def vendor_promotions(email):
         pass
 
     return render_template('vendor_promos.html', home_url="/home/vendor/" + email, success=success, error=error)
+
 
 @app.route('/home/vendor/<email>/rent/', methods=['POST', 'GET'])
 def vendor_rent(email):
@@ -191,6 +319,7 @@ def vendor_rent(email):
 
 # Customer Screens:
 
+
 @app.route('/home/customer/<email>/search_items/', methods=['POST', 'GET'])
 def customer_search_items(email):
     # TODO
@@ -202,6 +331,7 @@ def customer_search_items(email):
 
     return render_template('customer_search_item.html', home_url="/home/customer/" + email, success=success, error=error)
 
+
 @app.route('/home/customer/<email>/req_items/', methods=['POST', 'GET'])
 def customer_req_items(email):
     # TODO
@@ -212,6 +342,7 @@ def customer_req_items(email):
         pass
 
     return render_template('customer_req_item.html', home_url="/home/customer/" + email, success=success, error=error)
+
 
 @app.route('/home/customer/<email>/cart/', methods=['POST', 'GET'])
 def customer_cart(email):
@@ -293,10 +424,11 @@ def price_bounds(email):
     error = ""
     success = ""
 
-    allItems = getAllItems()
+    allItems = getAllItems()  # what would this return now?
 
     if request.method == 'POST':
-        requestItemID = int(request.form['itemId'])
+        requestItemName = (request.form['itemName'])
+        requestItemCat = request.form['itemCat']
         requestMinPrice = float(request.form['inputMinPrice'])
         requestMaxPrice = float(request.form['inputMaxPrice'])
 
@@ -311,36 +443,51 @@ def price_bounds(email):
             error = "Max Price cannot be less than Min Price!"
             return render_template('official_prices.html', home_url="/home/govt_official/" + email, allItems=allItems, error=error, success=success)
 
-        # check if item id is valid
+        # check if item exists i.e. itemName is valid
         itemExists = False
         for currRow in allItems:
-            tempID = currRow[0]
-            if tempID == requestItemID:
+            tempName = currRow[0]
+            if tempName == requestItemName:
                 itemExists = True
+                # if requestItemCat != currRow[1]:
+                #     error2 = "you input wrong category with an already existing item of another category"
                 break
         # should also check if prices are floats/int??
         if itemExists:
             conn = sqlite3.connect('IBDMS.db')
             cur = conn.cursor()
-            conn.execute('UPDATE items SET max_price = ?, min_price = ?'
-                         ' WHERE item_id = ?',
-                         (requestMaxPrice, requestMinPrice, requestItemID))
+
+            myQuery = """UPDATE items SET max_price = ?, min_price = ? WHERE item_name = ? """
+            cur.execute(myQuery,
+                        (requestMaxPrice, requestMinPrice, requestItemName))
 
             conn.commit()
             conn.close()
             # How do we print out success?????????????????????
+
             success = "Prices updated as requested."
 
             allItems = getAllItems()
             return render_template('official_prices.html', home_url="/home/govt_official/" + email, allItems=allItems, error=error, success=success)
 
-        else:
-            error = "incorrect item ID"
+        else:  # else new item being added so insert into table
 
-            # error = str(requestMinPrice) + " " + str(requestMaxPrice)
+            conn = sqlite3.connect('IBDMS.db')
+            cur = conn.cursor()
+            myQuery = """INSERT INTO items (item_name,item_category,max_price,min_price) VALUES ( ?,?,?,?)"""
+            cur.execute(myQuery, (requestItemName, requestItemCat,
+                                  requestMaxPrice, requestMinPrice))
+
+            conn.commit()
+            conn.close()
+            # How do we print out success?????????????????????
+            success = "New Item added as requested."
+
+            allItems = getAllItems()
             return render_template('official_prices.html', home_url="/home/govt_official/" + email, allItems=allItems, error=error, success=success)
 
     return render_template('official_prices.html', home_url="/home/govt_official/" + email, allItems=allItems, error=error, success=success)
+
 
 @app.route('/home/govt_official/<email>/statistics/', methods=['POST', 'GET'])
 def statistics(email):
@@ -382,7 +529,7 @@ def impose_fines(email):
             error = "There does not exist a vendor with the given Email ID."
             return render_template('official_fines.html', home_url="/home/govt_official/" + email, finesData=resultOfQuery, error=error, success=success)
 
-        # compute findID
+        # compute fineID
         myQuery = "select COALESCE(MAX(fine_id), 0) from fines"
         tempResult, error = execute_query(myQuery)
         requestFineId = tempResult[0][0] + 1

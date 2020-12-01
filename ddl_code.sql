@@ -23,24 +23,24 @@ create table promotions (
     primary key (customer_email, vendor_email)
 );
 create table location (
-    location_id     int,
-    x_coordinate    real,   
-    y_coordinate    real,
-    shop_number     int,
-    time_slot_id    int,
+    location_id int,
+    x_coordinate real,
+    y_coordinate real,
+    shop_number int,
+    time_slot_id int,
     primary key (location_id),
     foreign key (time_slot_id) references time_slot (time_slot_id)
 );
 create table customer (
     customer_name varchar(225),
     customer_email varchar(254),
-    -- email char length limit according to the relevent standard
     customer_pass varchar(225),
-    primary key (customer_name)
+    primary key (customer_email)
 );
 create table sales (
     sales_id int,
-    item_id int,
+    -- item_id int,
+    item_name varchar(225),
     vendor_email varchar(254),
     quantity int,
     price numeric(8, 2),
@@ -48,7 +48,7 @@ create table sales (
     discount numeric(8, 2),
     time_stamp datetime,
     customer_email varchar(254),
-    foreign key (item_id) references items (item_id),
+    foreign key (item_name) references items (item_name),
     foreign key (vendor_email) references vendor (vendor_email),
     foreign key (customer_email) references customer (customer_email),
     primary key(sales_id)
@@ -65,29 +65,32 @@ create table vendor (
     primary key (vendor_email)
 );
 create table items (
-    item_id int,
+    -- item_id int,
+    --remove , item_name is new primary
     item_name varchar(225),
     item_category varchar(225),
     max_price numeric(8, 2),
     min_price numeric(8, 2),
-    primary key (item_id)
+    primary key (item_name)
 );
 create table overall_stock (
     -- overall stock of the itwaar bazaar using each vendor's stock 
-    item_id int,
+    -- item_id int,
+    item_name varchar(225),
     vendor_email varchar(254),
     selling_price numeric(8, 2),
     quantity int,
-    foreign key (item_id) references items (item_id),
+    foreign key (item_name) references items (item_name),
     foreign key (vendor_email) references vendor (vendor_email),
-    primary key (item_id, vendor_email)
+    primary key (item_name, vendor_email)
 );
 create table requests (
     request_id int,
-    item_id int,
+    -- item_id int,
+    item_name varchar(225),
     quantity int,
     resolved boolean,
-    foreign key (item_id) references items (item_id),
+    foreign key (item_name) references items (item_name),
     primary key (request_id)
 );
 create table government_officials (
