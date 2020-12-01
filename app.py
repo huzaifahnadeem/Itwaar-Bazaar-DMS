@@ -273,7 +273,7 @@ def remove_time_location(email):
         else:
             query = "delete from location where time_slot_id = " + \
                 str(time_ID_to_remove) + ";"
-            _, error = execute_query(query)
+            col_names, q_result, error = execute_query(query)
 
             if error == "":
                 success = "Shop given time slot with id " + \
@@ -357,7 +357,7 @@ def impose_fines(email):
 
     finesQuery = "select * from fines"
     # resultOfQuery is a list containing all tuples (comma separated) corresponding to our query.
-    resultOfQuery, error = execute_query(finesQuery)
+    _, resultOfQuery, error = execute_query(finesQuery)
 
     if request.method == 'POST':
         # requestFineId = int(request.form['fineID'])
@@ -384,7 +384,7 @@ def impose_fines(email):
 
         # compute findID
         myQuery = "select COALESCE(MAX(fine_id), 0) from fines"
-        tempResult, error = execute_query(myQuery)
+        _, tempResult, error = execute_query(myQuery)
         requestFineId = tempResult[0][0] + 1
 
         # at this point vendor email ID  is valid that was input by the user so we run the query and add fine
@@ -402,7 +402,7 @@ def impose_fines(email):
         error2 = ""
         finesQuery = "select * from fines"
         # resultOfQuery is a list containing all tuples (comma separated) corresponding to our query.
-        resultOfQuery, error2 = execute_query(finesQuery)
+        _, resultOfQuery, error2 = execute_query(finesQuery)
         success = "Fine Added Successfully !"
         return render_template('official_fines.html', home_url="/home/govt_official/" + email, finesData=resultOfQuery, error=error, success=success)
 
