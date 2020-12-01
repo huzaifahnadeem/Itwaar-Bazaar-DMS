@@ -404,7 +404,7 @@ def remove_time_location(email):
         else:
             query = "delete from location where time_slot_id = " + \
                 str(time_ID_to_remove) + ";"
-            _, error = execute_query(query)
+            col_names, q_result, error = execute_query(query)
 
             if error == "":
                 success = "Shop given time slot with id " + \
@@ -504,7 +504,7 @@ def impose_fines(email):
 
     finesQuery = "select * from fines"
     # resultOfQuery is a list containing all tuples (comma separated) corresponding to our query.
-    resultOfQuery, error = execute_query(finesQuery)
+    _, resultOfQuery, error = execute_query(finesQuery)
 
     if request.method == 'POST':
         # requestFineId = int(request.form['fineID'])
@@ -531,7 +531,7 @@ def impose_fines(email):
 
         # compute fineID
         myQuery = "select COALESCE(MAX(fine_id), 0) from fines"
-        tempResult, error = execute_query(myQuery)
+        _, tempResult, error = execute_query(myQuery)
         requestFineId = tempResult[0][0] + 1
 
         # at this point vendor email ID  is valid that was input by the user so we run the query and add fine
@@ -549,7 +549,7 @@ def impose_fines(email):
         error2 = ""
         finesQuery = "select * from fines"
         # resultOfQuery is a list containing all tuples (comma separated) corresponding to our query.
-        resultOfQuery, error2 = execute_query(finesQuery)
+        _, resultOfQuery, error2 = execute_query(finesQuery)
         success = "Fine Added Successfully !"
         return render_template('official_fines.html', home_url="/home/govt_official/" + email, finesData=resultOfQuery, error=error, success=success)
 
@@ -604,13 +604,19 @@ def remove_officials(email):
 
 @app.route('/home/db_admin/<email>/query/', methods=['POST', 'GET'])
 def query_form(email):
+    query = ""
     query_result = ""
+    col_names = ""
     error = ""
+
     if request.method == 'POST':
         query = request.form['query']
-        (query_result, error) = execute_query(query)
+        (col_names, query_result, error) = execute_query(query)
 
-    return render_template('admin_query.html', home_url="/home/db_admin/" + email, query_result=query_result, error=error)
+        for i in range(len(col_names)):
+            col_names[i] = col_names[i].title()
+
+    return render_template('admin_query.html', home_url="/home/db_admin/" + email, query_result=query_result, error=error, query=query, col_names=col_names)
 
 
 def add_account(name, email, password, acc_type):
@@ -769,12 +775,14 @@ def execute_query(query):
     """
     error = ""
     result = []
+    names = []
+
     try:
         conn = sqlite3.connect('IBDMS.db', detect_types=sqlite3.PARSE_COLNAMES)
         cur = conn.cursor()
 
-        # cur.execute('''.headers on''')
         cur.execute(query)
+        names = list(map(lambda x: x[0], cur.description))
         result = cur.fetchall()
 
         conn.commit()
@@ -783,7 +791,7 @@ def execute_query(query):
     except:
         error = str(sys.exc_info()[1])
 
-    return (result, error)
+    return (names, result, error)
 
 
 def all_accounts(acc_type):

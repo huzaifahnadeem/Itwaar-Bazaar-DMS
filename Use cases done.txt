@@ -21,27 +21,27 @@
 = 10/23 *100 = 43.5%
 -------------------------------------------
 -------------------------------------------
-	80% submission: (TODO)
+	80% submission:
 -------------------------------------------
-11. !SQL queries (DB Admin)
-12. Rent location (vendor)
-13. TBD
-14. TBD
-15. TBD
-16. TBD
-17. TBD
-18. TBD
-19. TBD
+11. SQL queries (DB Admin)
+12. TODO: Rent a location (vendor)
+13. TODO: View Location and time slot (vendor)
+14. TODO: Add Stock (vendor)
+15. TODO: Update Stock (vendor)
+16. TODO: Delete Stock (vendor)
+17. TODO: View Stock (vendor)
+18. TODO: Request Items (customer)
+19. TODO: Promotions (vendor)
 -------------------------------------------
 = 19/23 *100 = 82.6%
 -------------------------------------------
 -------------------------------------------
 	100% submission: (TODO)
 -------------------------------------------
-20.  TBD
-21.  TBD
-22.  TBD
-23.  TBD
+20.  TODO: Statistics (G. Official)
+21.  TODO: View Sales (vendor)
+22.  TODO: Lookup items etc (customer)
+23.  TODO: Cart (Customer)
 -------------------------------------------
 = 23/23 *100 = 100%
 -------------------------------------------
