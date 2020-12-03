@@ -62,7 +62,56 @@
   <main role="main" class="container">
 
     <div class="starter-template">
-      <h1>TODO</h1>
+      <h1>Currently Rented Location and time for stall:</h1>
+      <table class="table table-striped">
+        <tr>
+          <th>Shop Number</th>
+          <th>Start Time</th>
+          <th>End Time</th>
+          <th>Rent</th>
+        </tr>
+
+        {% for i in current_rent_list %}
+        <tr>
+          {% for j in i %}
+            <td> {{j}} </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+
+      </table>
+
+      <form class="form-signin" method = "POST">
+        <h1 class="h3 mb-3 font-weight-bold">Enter the ID from the list to rent:</h1>
+        
+        <label for="ID_input" class="badge">ID:</label>
+        <input type="number" onkeypress="return event.charCode >= 48" min="0" name="ID" id="ID_input" placeholder="ID" class="form-control" required autofocus>
+          
+        <button class="btn btn-lg btn-success btn-block" type="submit">Rent</button>
+        
+        <p class="text-danger">{{ error }}</p> 
+        <p class="text-success">{{ success }}</p>  
+      </form>
+
+      <h1>Available Locations and times for stall:</h1>
+      <table class="table table-striped">
+        <tr>
+          <th>ID</th>
+          <th>Shop Number</th>
+          <th>Start Time</th>
+          <th>End Time</th>
+          <th>Rent</th>
+        </tr>
+
+        {% for i in available_rent_list %}
+        <tr>
+          {% for j in i %}
+            <td> {{j}} </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+
+      </table>
     </div>
 
   </main>

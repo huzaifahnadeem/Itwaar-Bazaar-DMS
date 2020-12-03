@@ -370,14 +370,47 @@ def vendor_promotions(email):
 
 @app.route('/home/vendor/<email>/rent/', methods=['POST', 'GET'])
 def vendor_rent(email):
-    # TODO
-    error = ""
     success = ""
+    error = ""
+    current_rent_list,_ = get_current_rented_details(email)
+    available_rent_list,_ = get_available_locations_times()
 
     if request.method == 'POST':
-        pass
+        time_ID_to_rent = request.form['ID']
 
-    return render_template('vendor_rent.html', home_url="/home/vendor/" + email, success=success, error=error)
+        exists = False
+        for i in available_rent_list:
+            for j in i:
+                if str(j) == str(time_ID_to_rent):
+                    exists = True
+
+        if exists == False:
+            error = "The entered ID does not exist. "
+        else:
+            try:
+                conn = sqlite3.connect('IBDMS.db')
+                cur = conn.cursor()
+
+                cur.execute(
+                '''
+                UPDATE stall 
+                SET rentee_email = ?
+                WHERE time_slot_id = ?;
+                ''',(email, str(time_ID_to_rent)))
+                
+                conn.commit()
+                conn.close()
+
+            except:
+                error = str(sys.exc_info()[1])
+            
+            if error == "":
+                success = "Rented Successfully."
+                current_rent_list,_ = get_current_rented_details(email)
+                available_rent_list,_ = get_available_locations_times()
+
+
+    return render_template('vendor_rent.html', home_url="/home/vendor/" + email, success=success, error=error, current_rent_list=current_rent_list, available_rent_list=available_rent_list)
 
 # Customer Screens:
 
@@ -518,6 +551,7 @@ def add_time_location(email):
         shop_num = request.form['shop_num']
         st_time = request.form['st-time']
         en_time = request.form['en-time']
+        rent = request.form['rent']
 
         start_time = datetime.datetime.strptime(
             st_time, "%H:%M")  # convert string to time
@@ -528,7 +562,7 @@ def add_time_location(email):
         if (delta < 0):
             error = "End time cannot be before start time."
         else:
-            error = insert_location_time(st_time, en_time, shop_num)
+            error = insert_location_time(st_time, en_time, shop_num, rent)
             if error == "":
                 success = "Time and location added successfully"
 
@@ -553,15 +587,26 @@ def remove_time_location(email):
         if exists == False:
             error = "The entered ID does not exist. "
         else:
-            query = "delete from location where time_slot_id = " + \
-                str(time_ID_to_remove) + ";"
-            col_names, q_result, error = execute_query(query)
+            try:
+                conn = sqlite3.connect('IBDMS.db')
+                cur = conn.cursor()
 
+                cur.execute("delete from location where time_slot_id = ?;",(str(time_ID_to_remove),))
+                cur.execute("delete from time_slot where time_slot_id = ?;",(str(time_ID_to_remove),))
+                cur.execute("delete from stall where time_slot_id = ?;",(str(time_ID_to_remove),))
+
+                conn.commit()
+                conn.close()
+
+            except:
+                error = str(sys.exc_info()[1])
+            
             if error == "":
                 success = "Shop given time slot with id " + \
                     str(time_ID_to_remove) + " removed successfully."
                 list_of_shops_and_times = get_all_shops_with_slots()
                 return render_template('official_remove_time_location.html', home_url="/home/govt_official/" + email, list_of_shops_and_times=list_of_shops_and_times, error=error, success=success)
+           
 
     return render_template('official_remove_time_location.html', home_url="/home/govt_official/" + email, list_of_shops_and_times=list_of_shops_and_times, error=error, success=success)
 
@@ -985,13 +1030,14 @@ def all_accounts(acc_type):
     return result
 
 
-def insert_location_time(st_time, en_time, shop_num_str):
+def insert_location_time(st_time, en_time, shop_num_str, rent):
     """
     Inserts tuples into location and time_slot tables with the given values.
 
     @param st_time: string of HH:MM form in 24 hour time
     @param en_time: string of HH:MM form in 24 hour time
     @param shop_num: string containing shop num
+    @param rent: int containing shop num
     @:return: error: a string containing error returned (if any)
     """
 
@@ -1045,6 +1091,15 @@ def insert_location_time(st_time, en_time, shop_num_str):
 
         query_result.append(cur.fetchall())
 
+        cur.execute(
+            '''
+        INSERT INTO stall (location_id, rent, time_slot_id)
+        VALUES (?, ?, ?);
+        ''', (this_location_id, rent, this_time_slot_id)
+        )
+
+        query_result.append(cur.fetchall())
+
         conn.commit()
         conn.close()
     except:
@@ -1069,9 +1124,9 @@ def get_all_shops_with_slots():
 
         cur.execute(
             '''
-        SELECT location.time_slot_id, shop_number, start_time, end_time
-        FROM time_slot INNER JOIN location
-        ON time_slot.time_slot_id = location.time_slot_id
+        SELECT location.time_slot_id, shop_number, start_time, end_time, rent, rentee_email
+        FROM time_slot INNER JOIN location INNER JOIN stall
+        ON time_slot.time_slot_id = location.time_slot_id and stall.time_slot_id = location.time_slot_id
         ORDER BY location.time_slot_id;
         '''
         )
@@ -1129,3 +1184,67 @@ def get_All_customers_with_promotions():
 
     return result
 
+def get_current_rented_details(email):
+    """
+    returns a list of all items.
+    @param: email: the email of the rentee to find the currently rented locations and times
+
+    @:return: list: list of all the rented locations and times for the given email
+    """
+
+    error = ""
+    result = []
+
+    try:
+        conn = sqlite3.connect('IBDMS.db')
+        cur = conn.cursor()
+
+        cur.execute(
+        '''
+        SELECT shop_number, start_time, end_time, rent
+        FROM time_slot INNER JOIN location INNER JOIN stall
+        ON time_slot.time_slot_id = location.time_slot_id and stall.time_slot_id = location.time_slot_id and rentee_email = ?
+        ORDER BY location.time_slot_id;
+        ''', (email,))
+
+        result = cur.fetchall()
+
+        conn.commit()
+        conn.close()
+
+    except:
+        error = str(sys.exc_info()[1])
+    
+    return result,error
+
+def get_available_locations_times():
+    """
+    returns a list of all available locations and time for rent.
+
+    @:return: list: list of all the location_ids available.
+    """
+
+    error = ""
+    result = []
+
+    try:
+        conn = sqlite3.connect('IBDMS.db')
+        cur = conn.cursor()
+
+        cur.execute(
+        '''
+        SELECT location.time_slot_id, shop_number, start_time, end_time, rent
+        FROM time_slot INNER JOIN location INNER JOIN stall
+        ON time_slot.time_slot_id = location.time_slot_id and stall.time_slot_id = location.time_slot_id and rentee_email IS NULL
+        ORDER BY location.time_slot_id;
+        ''')
+
+        result = cur.fetchall()
+
+        conn.commit()
+        conn.close()
+
+    except:
+        error = str(sys.exc_info()[1])
+    
+    return result,error
