@@ -62,7 +62,41 @@
   <main role="main" class="container">
 
     <div class="starter-template">
-      <h1>TODO</h1>
+      <h1>
+        {%if success != "" %}
+        <p class="text-success">{{ success }}</p>
+        {% endif %}
+
+        {%if error != "" %}
+        <p class="text-danger">{{ error }}</p>
+        {% endif %}
+
+        <form method="post">
+
+          <h1 class="h3 mb-3 font-weight-normal">Manage Promotion</h1>
+          <!--The for attribute of <label> must be equal to the id attribute of the related element to bind them together.-->
+          <!--for & id should be same so that they are binded together-->
+          <!--name of input is used when pasing this form in app.py-->
+  
+          <label for="customer_email" class="sr-only">Customer Email</label>
+          <input type="text" name="customer_email" id="customer_email" class="form-control" placeholder="Customer Email..." required
+            autofocus>
+  
+          <label for="details" class="sr-only">Detail</label>
+          <input type="text" name="details" id="details" class="form-control" placeholder="Details...Type None if you want to end a promotion"
+            required autofocus>
+  
+  
+          <label for="ended" class="sr-only">Ended</label>
+          <input type="text" name="ended" id="ended" class="form-control" placeholder="End promotion...enter Y for Yes, N for No" required
+            autofocus>
+  
+  
+          <button class="btn btn-lg btn-success btn-block" type="submit">SUBMIT</button>
+        </form>
+
+
+      </h1>
     </div>
 
   </main>
