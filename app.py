@@ -298,11 +298,33 @@ def vendor_sales(email):
     # TODO
     error = ""
     success = ""
+    abcd = ['blah']
+    print (abcd.count('blah'))
 
     if request.method == 'POST':
-        pass
+        
+        print (abcd.count('blah')) 
 
-    return render_template('vendor_sales.html', home_url="/home/vendor/" + email, success=success, error=error)
+        conn = sqlite3.connect('IBDMS.db')
+        cur = conn.cursor()
+        cur.execute(
+        '''
+            select* from sales;
+            '''
+        )
+
+        abcd = cur.fetchall()
+
+        conn.commit()
+        conn.close()
+        print (abcd.count())
+        if abcd.count()==4:
+            error = "No sales yet"
+            return render_template('vendor_sales.html', home_url="/home/vendor/" + email, success=success, error=error)
+
+
+
+    return render_template('vendor_sales.html', home_url="/home/vendor/" + email,itemData=abcd, success=success, error=error)
 
 
 @app.route('/home/vendor/<email>/promotions/', methods=['POST', 'GET'])
