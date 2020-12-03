@@ -9,8 +9,10 @@ create table stall (
     location_id int,
     rent numeric(8, 2),
     -- using numeric(8,2) for currency
+    rentee_email varchar(254),
     foreign key (time_slot_id) references time_slot (time_slot_id),
     foreign key (location_id) references location (location_id),
+    foreign key (rentee_email) references vendor (vendor_email),
     primary key (time_slot_id, location_id)
 );
 create table promotions (

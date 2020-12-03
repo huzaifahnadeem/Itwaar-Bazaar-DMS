@@ -62,7 +62,30 @@
   <main role="main" class="container">
 
     <div class="starter-template">
-      <h1>TODO</h1>
+      <h1>
+        <table class="table table-striped">
+          <tr>
+            <!-- <th>Item ID</th> -->
+            <th>Sales ID</th>
+            <th>Item Name </th>
+            <th>Vendor Email</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Discount</th>
+            <th>Time Stamp</th>
+            <th>Customer Email</th>
+          </tr>
+  
+          {% for currTuple in itemData %}
+          <tr>
+            {% for currElement in currTuple %}
+            <td> {{currElement}} </td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+  
+        </table>
+      </h1>
     </div>
 
   </main>
