@@ -307,7 +307,7 @@ def vendor_sales(email):
 
 @app.route('/home/vendor/<email>/promotions/', methods=['POST', 'GET'])
 def vendor_promotions(email):
-    
+
     error = ""
     success = ""
     validCustomerName = False
@@ -315,28 +315,27 @@ def vendor_promotions(email):
         request_customer_email = request.form['customer_email']
         request_details = request.form['details']
         request_ended = request.form['ended']
-
+        
         if not((request_ended == 'Y') or (request_ended == 'N')):
             error = "Either enter a 'Y' or a 'N' in the last line"
             return render_template('vendor_promos.html', home_url="/home/vendor/<email>/promotions/" + email,    success=success, error=error)
 
-
         if request_ended == 'N':
-            boolean_ended = 0  
+            boolean_ended = 0
             conn = sqlite3.connect('IBDMS.db')
             cur = conn.cursor()
 
             myQuery = """INSERT INTO promotions (customer_email,vendor_email,details,ended) VALUES ( ?,?,?,?)"""
-            cur.execute(myQuery, (request_customer_email, email,request_details, boolean_ended))
+            cur.execute(myQuery, (request_customer_email,
+                                  email, request_details, boolean_ended))
 
             conn.commit()
             conn.close()
             success = "Promotion Added Successfully."
-        
+
         if request_ended == 'Y':
             boolean_ended = 1
-               
-            
+
             all_customer_emails = get_All_customers_with_promotions()
             for currRow in all_customer_emails:
                 tempName = currRow[0]
@@ -344,7 +343,7 @@ def vendor_promotions(email):
                     validCustomerName = True
                     break
 
-            if  validCustomerName == True:
+            if validCustomerName == True:
                 conn = sqlite3.connect('IBDMS.db')
                 cur = conn.cursor()
 
@@ -357,13 +356,6 @@ def vendor_promotions(email):
             else:
                 error = "Customer not in the database"
                 return render_template('vendor_promos.html', home_url="/home/vendor/<email>/promotions/" + email,    success=success, error=error)
-
-
-       
-      
-
-
-        
 
     return render_template('vendor_promos.html', home_url="/home/vendor/" + email, success=success, error=error)
 
@@ -1111,7 +1103,7 @@ def getAllItems():
 
 
 def get_All_customers_with_promotions():
-    
+
     result = []
 
     conn = sqlite3.connect('IBDMS.db')
@@ -1128,4 +1120,3 @@ def get_All_customers_with_promotions():
     conn.close()
 
     return result
-
