@@ -139,7 +139,7 @@ def vendor_stock_add(email):
     if request.method == 'POST':
         requestItemName = request.form['itemName']
         requestSellingPrice = float(request.form['sellingPrice'])
-        requestQuantity = int(request.form['quantity'])
+        requestQuantity = float(request.form['quantity'])
 
         if requestQuantity <= 0:
             error = "Quantity should be a positive value."
@@ -163,7 +163,7 @@ def vendor_stock_add(email):
             itemMinPrice = matchedData[3]
             itemMaxPrice = matchedData[2]
 
-            if requestSellingPrice > itemMinPrice:
+            if requestSellingPrice > itemMaxPrice:
                 error = "Selling price is more than maximum allowed price. You will be fined !"
             if requestSellingPrice < itemMinPrice:
                 error = "Selling price is less than minimum allowed price. You will be fined !"
@@ -217,14 +217,25 @@ def vendor_stock_add(email):
 
 @app.route('/home/vendor/<email>/view_stock/', methods=['POST', 'GET'])
 def vendor_stock_view(email):
-    # TODO
-    error = ""
-    success = ""
 
-    if request.method == 'POST':
-        pass
+    # error = ""
+    # success = ""
 
-    return render_template('vendor_stock_view.html', home_url="/home/vendor/" + email, success=success, error=error)
+    vendorName = get_name(email, "vendor")
+    # get stock just join operation
+    conn = sqlite3.connect('IBDMS.db')
+    cur = conn.cursor()
+    myQuery = """ SELECT item_name, item_category,selling_price,quantity,item_units 
+                    FROM items natural join overall_stock
+                    where overall_stock.vendor_email = ?"""
+    cursor = cur.execute(myQuery, (email,))
+    resultOfQuery = cursor.fetchall()
+    # columnNames = list(map(lambda x: x[0], cursor.description))
+
+    conn.commit()
+    conn.close()
+
+    return render_template('vendor_stock_view.html', home_url="/home/vendor/" + email, vendorStock=resultOfQuery, vendorName=vendorName)
 
 
 @app.route('/home/vendor/<email>/remove_stock/', methods=['POST', 'GET'])
@@ -407,12 +418,101 @@ def customer_search_items(email):
 
 @app.route('/home/customer/<email>/req_items/', methods=['POST', 'GET'])
 def customer_req_items(email):
-    # TODO
     error = ""
     success = ""
 
     if request.method == 'POST':
-        pass
+        requestItemName = request.form['itemName']
+        requestQuantity = float(request.form['quantity'])
+
+        # if item name not part of allowed items set by govt official then give error
+        conn = sqlite3.connect('IBDMS.db')
+        cur = conn.cursor()
+        myQuery = """ SELECT EXISTS(SELECT 1 FROM items WHERE item_name= ?) """
+        resultTuple = cur.execute(myQuery,
+                                  (requestItemName,)).fetchone()
+        conn.commit()
+        conn.close()
+        itemExists = resultTuple[0]
+        if not itemExists:
+            error = "Requested item not allowed by govt_official to be sold !"
+            return render_template('customer_req_item.html', home_url="/home/customer/" + email, success=success, error=error)
+
+        # if quantity <= 0 then give error
+        if requestQuantity <= 0:
+            error = "Requested Quantity Should Be Positive Integer."
+            return render_template('customer_req_item.html', home_url="/home/customer/" + email, success=success, error=error)
+
+        # check if the requested Quantity is available at itwaar bazaar even if sold by diff vendors with diff small quantities such that all add up to be  >= requestedQuantity
+        conn = sqlite3.connect('IBDMS.db')
+        cur = conn.cursor()
+        myQuery = """ SELECT SUM(quantity) from overall_stock WHERE item_name= ? """
+        resultTuple = cur.execute(myQuery, (requestItemName,)).fetchone()
+        conn.commit()
+        conn.close()
+        currentQuantityAvailable = resultTuple[0]
+
+        if currentQuantityAvailable >= requestQuantity:  # if yes then give error that you can buy the requested quantity from the list of vendors selling this item with this much of current quanitty available
+            error = "Requested quantity already available in Itwaar Bazaar !"
+            quantityAvailable = True
+            # get vendor details who is selling and what quantity
+            # join overall_stock with vendor table on vendor_email where quantity > 0 and item_name = requestItem
+            # extract vendor email,selling price,quantity,vendor name, shop number, start end times, location cordinates
+
+            conn = sqlite3.connect('IBDMS.db')
+            cur = conn.cursor()
+
+            # myQuery = """ SELECT
+            #                 vendor.vendor_name ,overall_stock.selling_price ,overall_stock.quantity,location.shop_number,location.x_coordinate,location.y_coordinate,time_slot.start_time,time_slot.end_time
+            #             FROM
+            #                 vendor cross join overall_stock ON vendor.vendor_email = overall_stock.vendor_email
+            #                 cross join location ON  vendor.location_id = location.location_id
+            #                 cross join time_slot ON location.time_slot_id = time_slot.time_slot_id
+            #             where
+            #                 overall_stock.quantity > 0 And overall_stock.item_name = ?"""
+
+            myQuery = """ SELECT
+                            vendor.vendor_name,vendor.vendor_email ,overall_stock.selling_price ,overall_stock.quantity
+                        FROM
+                            vendor inner join overall_stock ON vendor.vendor_email = overall_stock.vendor_email
+                        where
+                            overall_stock.quantity > 0 And overall_stock.item_name = ?"""
+
+            cursor = cur.execute(myQuery,
+                                 (requestItemName,))
+
+            tableData = cursor.fetchall()
+            # get table column names and remove _ from the columns
+            tableColumns = list(map(lambda x: x[0], cursor.description))
+            tableColumnsList = []
+            for currItem in tableColumns:
+                tempStr = str(currItem).replace("_", " ")
+                tableColumnsList.append(tempStr)
+
+            conn.commit()
+            conn.close()
+            return render_template('customer_req_item.html', home_url="/home/customer/" + email, success=success, error=error, quantityAvailable=quantityAvailable, tableData=tableData, tableColumnsList=tableColumnsList)
+
+        else:  # final case: add to request table and give success message
+
+            # compute reqID
+            myQuery = "select COALESCE(MAX(request_id), 0) from requests"
+            _, tempResult, error = execute_query(myQuery)
+            requestID = tempResult[0][0] + 1
+
+            # insert request
+            conn = sqlite3.connect('IBDMS.db')
+            cur = conn.cursor()
+
+            myQuery = """ INSERT into requests values(?,?,?,?) """
+
+            cur.execute(myQuery, (requestID, requestItemName,
+                                  requestQuantity, False))
+            conn.commit()
+            conn.close()
+            success = "Request Added Successfully !"
+
+            return render_template('customer_req_item.html', home_url="/home/customer/" + email, success=success, error=error)
 
     return render_template('customer_req_item.html', home_url="/home/customer/" + email, success=success, error=error)
 
@@ -504,6 +604,7 @@ def price_bounds(email):
         requestItemCat = request.form['itemCat']
         requestMinPrice = float(request.form['inputMinPrice'])
         requestMaxPrice = float(request.form['inputMaxPrice'])
+        requestItemUnits = (request.form['itemUnits'])
 
         if (requestMinPrice) < 0:
             error = "Min Price cannot be negative!"
@@ -547,9 +648,9 @@ def price_bounds(email):
 
             conn = sqlite3.connect('IBDMS.db')
             cur = conn.cursor()
-            myQuery = """INSERT INTO items (item_name,item_category,max_price,min_price) VALUES ( ?,?,?,?)"""
+            myQuery = """INSERT INTO items (item_name,item_category,max_price,min_price,item_units) VALUES ( ?,?,?,?,?)"""
             cur.execute(myQuery, (requestItemName, requestItemCat,
-                                  requestMaxPrice, requestMinPrice))
+                                  requestMaxPrice, requestMinPrice, requestItemUnits))
 
             conn.commit()
             conn.close()

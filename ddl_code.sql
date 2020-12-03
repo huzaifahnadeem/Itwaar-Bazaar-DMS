@@ -42,7 +42,7 @@ create table sales (
     -- item_id int,
     item_name varchar(225),
     vendor_email varchar(254),
-    quantity int,
+    quantity FLOAT,
     price numeric(8, 2),
     -- before discount i.e. the standard price e.g. per kg
     discount numeric(8, 2),
@@ -71,6 +71,7 @@ create table items (
     item_category varchar(225),
     max_price numeric(8, 2),
     min_price numeric(8, 2),
+    item_units varchar(225),
     primary key (item_name)
 );
 create table overall_stock (
@@ -79,7 +80,7 @@ create table overall_stock (
     item_name varchar(225),
     vendor_email varchar(254),
     selling_price numeric(8, 2),
-    quantity int,
+    quantity FLOAT,
     foreign key (item_name) references items (item_name),
     foreign key (vendor_email) references vendor (vendor_email),
     primary key (item_name, vendor_email)
@@ -88,7 +89,7 @@ create table requests (
     request_id int,
     -- item_id int,
     item_name varchar(225),
-    quantity int,
+    quantity FLOAT,
     resolved boolean,
     foreign key (item_name) references items (item_name),
     primary key (request_id)
