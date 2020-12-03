@@ -93,6 +93,9 @@
         <label for="inputMinPrice" class="sr-only">Min Price</label>
         <input type="text" name="inputMinPrice" id="inputMinPrice" class="form-control" placeholder="Min Price" required
           autofocus>
+        <label for="itemUnits" class="sr-only">Item Units</label>
+        <input type="text" name="itemUnits" id="itemUnits" class="form-control" placeholder="Units..." required
+          autofocus>
 
 
         <button class="btn btn-lg btn-success btn-block" type="submit">UPDATE</button>
@@ -110,6 +113,7 @@
           <th>Item Category</th>
           <th>Max Price</th>
           <th>Min Price</th>
+          <th>Units</th>
         </tr>
 
         {% for currTuple in allItems %}
