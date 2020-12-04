@@ -24,14 +24,14 @@
 	80% submission:
 -------------------------------------------
 11. SQL queries (DB Admin)
-12. TODO: Rent a location (vendor)
-13. TODO: View Location and time slot (vendor)
+12. Rent a location (vendor)
+13. View Location and time slot (vendor)
 14. Add Stock (vendor)
 15. Update Stock (vendor)
 16. Delete Stock (vendor)
-17. TODO: View Stock (vendor)
-18. TODO: Request Items (customer)
-19. Promotions (vendor)
+17. View Stock (vendor)
+18. Request Items (customer)
+19. TODO: Promotions (vendor)
 -------------------------------------------
 = 19/23 *100 = 82.6%
 -------------------------------------------
