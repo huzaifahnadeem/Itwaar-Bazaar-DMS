@@ -17,7 +17,7 @@ create table promotions (
     customer_email varchar(254),
     vendor_email varchar(254),
     details varchar(500),
-    ended boolean,
+    ended varchar(254),
     foreign key (customer_email) references customer (customer_email),
     foreign key (vendor_email) references vendor (vendor_email),
     primary key (customer_email, vendor_email)

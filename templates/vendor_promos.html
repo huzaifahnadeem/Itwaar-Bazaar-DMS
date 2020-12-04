@@ -83,18 +83,48 @@
             autofocus>
   
           <label for="details" class="sr-only">Detail</label>
-          <input type="text" name="details" id="details" class="form-control" placeholder="Details...Type None if you want to end a promotion"
+          <input type="text" name="details" id="details" class="form-control" placeholder="Change Details...Type None if you want to end a promotion"
             required autofocus>
   
   
-          <label for="ended" class="sr-only">Ended</label>
-          <input type="text" name="ended" id="ended" class="form-control" placeholder="End promotion...enter Y for Yes, N for No" required
-            autofocus>
+            <div class="row">
+              <div class="radio col-sm">
+                <input type="radio" name="ended" id="cus-btn" value="Yes" checked="checked">
+                <label for="cus-btn" ><span class="badge badge-light">Ended</span></label>
+              </div>
+              <div class="radio col-sm">
+                <input type="radio" name="ended" id="ven-btn" value="No">
+                <label for="ven-btn" ><span class="badge badge-light">Not Ended</span></label>
+              </div>
+            </div>
+        
   
   
           <button class="btn btn-lg btn-success btn-block" type="submit">SUBMIT</button>
         </form>
+        <br>
+        <br>
+        <h1 class="h3 mb-3 font-weight-normal"> Customers and their promotions</h1>
+      <!--print allItems list argument....each element of list is a complete row(in a tuple) -->
+      <!--CONVERT THIS PRINT INTO A GOOD LOOKING TABLE-->
+      <table class="table table-striped">
+        <tr>
+          <!-- <th>Item ID</th> -->
+          <th>Customer Name</th>
+          <th>Customer Email</th>
+          <th>Details</th>
+          <th>Ended</th>
+        </tr>
 
+        {% for currTuple in itemData %}
+        <tr>
+          {% for currElement in currTuple %}
+          <td> {{currElement}} </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+
+      </table>
 
       </h1>
     </div>

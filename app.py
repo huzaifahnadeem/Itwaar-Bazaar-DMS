@@ -333,62 +333,89 @@ def vendor_promotions(email):
     error = ""
     success = ""
     validCustomerName = False
+    valid_Customer_in_table = False
+    promotions_data = get_All_promotion_details(email) 
+    
+                
+
+
+
+
     if request.method == 'POST':
+
+        #outputting all customer_ids relevant to this vendor and their relevant promotion details
+
+ 
+    
+
+
         request_customer_email = request.form['customer_email']
         request_details = request.form['details']
         request_ended = request.form['ended']
 
-        if not((request_ended == 'Y') or (request_ended == 'N')):
-            error = "Either enter a 'Y' or a 'N' in the last line"
-            return render_template('vendor_promos.html', home_url="/home/vendor/<email>/promotions/" + email,    success=success, error=error)
+        # if not((request_ended == 'Yes') or (request_ended == 'No')):
+        #     error = "Either enter a \"Yes\" or a \"No\" in the last line"
+        #     return render_template('vendor_promos.html', home_url="/home/vendor/<email>/promotions/" + email, itemData=promotions_data,   success=success, error=error)
+
+        
 
 
-        if request_ended == 'N':
-            boolean_ended = 0  
+
+        all_customer_emails = get_All_customers()
+        for currRow in all_customer_emails:
+            tempName = currRow[0]
+            if tempName == request_customer_email:
+                valid_Customer_in_table = True
+                break
+        
+
+        if valid_Customer_in_table == False:
+            error = "No Customer registered with this account"
+            return render_template('vendor_promos.html', home_url="/home/vendor/<email>/promotions/" + email, itemData=promotions_data,   success=success, error=error)
+
+
+
+        all_customer_emails = get_All_customers_with_promotions(email)
+        for currRow in all_customer_emails:
+            tempName = currRow[0]
+            if tempName == request_customer_email:
+                validCustomerName = True
+                break
+
+
+        if  validCustomerName == False:
+            
+            
             conn = sqlite3.connect('IBDMS.db')
             cur = conn.cursor()
 
             myQuery = """INSERT INTO promotions (customer_email,vendor_email,details,ended) VALUES ( ?,?,?,?)"""
-            cur.execute(myQuery, (request_customer_email, email,request_details, boolean_ended))
+            cur.execute(myQuery, (request_customer_email, email,request_details, request_ended))
 
             conn.commit()
             conn.close()
-            success = "Promotion Added Successfully."
+            success = "New Promotion Added."
         
-        if request_ended == 'Y':
-            boolean_ended = 1
+        if validCustomerName == True:
+            
                
             
-            all_customer_emails = get_All_customers_with_promotions()
-            for currRow in all_customer_emails:
-                tempName = currRow[0]
-                if tempName == request_customer_email:
-                    validCustomerName = True
-                    break
+            conn = sqlite3.connect('IBDMS.db')
+            cur = conn.cursor()
 
-            if  validCustomerName == True:
-                conn = sqlite3.connect('IBDMS.db')
-                cur = conn.cursor()
+            myQuery = """UPDATE promotions SET details = ? ,ended = ? WHERE customer_email = ?"""
+            cur.execute(myQuery, (request_details,request_ended, request_customer_email))
 
-                myQuery = """UPDATE promotions SET ended = ? WHERE customer_email = ?"""
-                cur.execute(myQuery, (boolean_ended, request_customer_email))
+            conn.commit()
+            conn.close()
+            success = "Promotion Updated."
+            
 
-                conn.commit()
-                conn.close()
-                success = "Promotion Ended Successfully."
-            else:
-                error = "Customer not in the database"
-                return render_template('vendor_promos.html', home_url="/home/vendor/<email>/promotions/" + email,    success=success, error=error)
+    if(success!=""):
+        promotions_data = get_All_promotion_details(email) 
 
-
-       
-      
-
-
-        
-
-    return render_template('vendor_promos.html', home_url="/home/vendor/" + email, success=success, error=error)
-
+    return render_template('vendor_promos.html', home_url="/home/vendor/" + email,itemData=promotions_data, success=success, error=error)
+    
 
 @app.route('/home/vendor/<email>/rent/', methods=['POST', 'GET'])
 def vendor_rent(email):
@@ -1132,7 +1159,7 @@ def getAllItems():
     return result
 
 
-def get_All_customers_with_promotions():
+def get_All_customers_with_promotions(email):
     
     result = []
 
@@ -1140,8 +1167,8 @@ def get_All_customers_with_promotions():
     cur = conn.cursor()
     cur.execute(
         '''
-            select customer_email from promotions;
-            '''
+            select customer_email from promotions where vendor_email = ?;''' ,(email,)
+            
     )
 
     result = cur.fetchall()
@@ -1151,3 +1178,35 @@ def get_All_customers_with_promotions():
 
     return result
 
+#gives only those promotions for vendors that are linked to the given account
+def get_All_promotion_details(email):
+    result = []
+
+    conn = sqlite3.connect('IBDMS.db')
+    cur = conn.cursor()
+    cur.execute('''select customer_name, customer_email, details, ended from customer natural left outer join promotions where vendor_email = ?;''' ,(email,))
+
+    result = cur.fetchall()
+
+    conn.commit()
+    conn.close()
+
+    return result
+
+def get_All_customers():
+    result = []
+
+    conn = sqlite3.connect('IBDMS.db')
+    cur = conn.cursor()
+    cur.execute(
+        '''
+            select customer_email from customer;
+            '''
+    )
+
+    result = cur.fetchall()
+
+    conn.commit()
+    conn.close()
+
+    return result
