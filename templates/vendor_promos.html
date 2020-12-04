@@ -77,54 +77,54 @@
           <!--The for attribute of <label> must be equal to the id attribute of the related element to bind them together.-->
           <!--for & id should be same so that they are binded together-->
           <!--name of input is used when pasing this form in app.py-->
-  
+
           <label for="customer_email" class="sr-only">Customer Email</label>
-          <input type="text" name="customer_email" id="customer_email" class="form-control" placeholder="Customer Email..." required
-            autofocus>
-  
+          <input type="text" name="customer_email" id="customer_email" class="form-control"
+            placeholder="Customer Email..." required autofocus>
+
           <label for="details" class="sr-only">Detail</label>
-          <input type="text" name="details" id="details" class="form-control" placeholder="Change Details...Type None if you want to end a promotion"
-            required autofocus>
-  
-  
-            <div class="row">
-              <div class="radio col-sm">
-                <input type="radio" name="ended" id="cus-btn" value="Yes" checked="checked">
-                <label for="cus-btn" ><span class="badge badge-light">Ended</span></label>
-              </div>
-              <div class="radio col-sm">
-                <input type="radio" name="ended" id="ven-btn" value="No">
-                <label for="ven-btn" ><span class="badge badge-light">Not Ended</span></label>
-              </div>
+          <input type="text" name="details" id="details" class="form-control"
+            placeholder="Change Details...Type None if you want to end a promotion" required autofocus>
+
+
+          <div class="row">
+            <div class="radio col-sm">
+              <input type="radio" name="ended" id="cus-btn" value="Yes" checked="checked">
+              <label for="cus-btn"><span class="badge badge-light">Ended</span></label>
             </div>
-        
-  
-  
-          <button class="btn btn-lg btn-success btn-block" type="submit">SUBMIT</button>
+            <div class="radio col-sm">
+              <input type="radio" name="ended" id="ven-btn" value="No">
+              <label for="ven-btn"><span class="badge badge-light">Not Ended</span></label>
+            </div>
+          </div>
+
+
+
+          <button class="btn btn-lg btn-success btn-block" type="submit">ADD/UPDATE</button>
         </form>
         <br>
         <br>
         <h1 class="h3 mb-3 font-weight-normal"> Customers and their promotions</h1>
-      <!--print allItems list argument....each element of list is a complete row(in a tuple) -->
-      <!--CONVERT THIS PRINT INTO A GOOD LOOKING TABLE-->
-      <table class="table table-striped">
-        <tr>
-          <!-- <th>Item ID</th> -->
-          <th>Customer Name</th>
-          <th>Customer Email</th>
-          <th>Details</th>
-          <th>Ended</th>
-        </tr>
+        <!--print allItems list argument....each element of list is a complete row(in a tuple) -->
+        <!--CONVERT THIS PRINT INTO A GOOD LOOKING TABLE-->
+        <table class="table table-striped">
+          <tr>
+            <!-- <th>Item ID</th> -->
+            <th>Customer Name</th>
+            <th>Customer Email</th>
+            <th>Details</th>
+            <th>Ended</th>
+          </tr>
 
-        {% for currTuple in itemData %}
-        <tr>
-          {% for currElement in currTuple %}
-          <td> {{currElement}} </td>
+          {% for currTuple in itemData %}
+          <tr>
+            {% for currElement in currTuple %}
+            <td> {{currElement}} </td>
+            {% endfor %}
+          </tr>
           {% endfor %}
-        </tr>
-        {% endfor %}
 
-      </table>
+        </table>
 
       </h1>
     </div>

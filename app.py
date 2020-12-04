@@ -299,16 +299,16 @@ def vendor_sales(email):
     error = ""
     success = ""
     abcd = ['blah']
-    print (abcd.count('blah'))
+    print(abcd.count('blah'))
 
     if request.method == 'POST':
-        
-        print (abcd.count('blah')) 
+
+        print(abcd.count('blah'))
 
         conn = sqlite3.connect('IBDMS.db')
         cur = conn.cursor()
         cur.execute(
-        '''
+            '''
             select* from sales;
             '''
         )
@@ -317,37 +317,26 @@ def vendor_sales(email):
 
         conn.commit()
         conn.close()
-        print (abcd.count())
-        if abcd.count()==4:
+        print(abcd.count())
+        if abcd.count() == 4:
             error = "No sales yet"
             return render_template('vendor_sales.html', home_url="/home/vendor/" + email, success=success, error=error)
 
-
-
-    return render_template('vendor_sales.html', home_url="/home/vendor/" + email,itemData=abcd, success=success, error=error)
+    return render_template('vendor_sales.html', home_url="/home/vendor/" + email, itemData=abcd, success=success, error=error)
 
 
 @app.route('/home/vendor/<email>/promotions/', methods=['POST', 'GET'])
 def vendor_promotions(email):
-    
+
     error = ""
     success = ""
     validCustomerName = False
     valid_Customer_in_table = False
-    promotions_data = get_All_promotion_details(email) 
-    
-                
-
-
-
+    promotions_data = get_All_promotion_details(email)
 
     if request.method == 'POST':
 
-        #outputting all customer_ids relevant to this vendor and their relevant promotion details
-
- 
-    
-
+        # outputting all customer_ids relevant to this vendor and their relevant promotion details
 
         request_customer_email = request.form['customer_email']
         request_details = request.form['details']
@@ -357,23 +346,16 @@ def vendor_promotions(email):
         #     error = "Either enter a \"Yes\" or a \"No\" in the last line"
         #     return render_template('vendor_promos.html', home_url="/home/vendor/<email>/promotions/" + email, itemData=promotions_data,   success=success, error=error)
 
-        
-
-
-
         all_customer_emails = get_All_customers()
         for currRow in all_customer_emails:
             tempName = currRow[0]
             if tempName == request_customer_email:
                 valid_Customer_in_table = True
                 break
-        
 
         if valid_Customer_in_table == False:
             error = "No Customer registered with this account"
             return render_template('vendor_promos.html', home_url="/home/vendor/<email>/promotions/" + email, itemData=promotions_data,   success=success, error=error)
-
-
 
         all_customer_emails = get_All_customers_with_promotions(email)
         for currRow in all_customer_emails:
@@ -382,47 +364,44 @@ def vendor_promotions(email):
                 validCustomerName = True
                 break
 
+        if validCustomerName == False:
 
-        if  validCustomerName == False:
-            
-            
             conn = sqlite3.connect('IBDMS.db')
             cur = conn.cursor()
 
             myQuery = """INSERT INTO promotions (customer_email,vendor_email,details,ended) VALUES ( ?,?,?,?)"""
-            cur.execute(myQuery, (request_customer_email, email,request_details, request_ended))
+            cur.execute(myQuery, (request_customer_email,
+                                  email, request_details, request_ended))
 
             conn.commit()
             conn.close()
             success = "New Promotion Added."
-        
+
         if validCustomerName == True:
-            
-               
-            
+
             conn = sqlite3.connect('IBDMS.db')
             cur = conn.cursor()
 
             myQuery = """UPDATE promotions SET details = ? ,ended = ? WHERE customer_email = ?"""
-            cur.execute(myQuery, (request_details,request_ended, request_customer_email))
+            cur.execute(myQuery, (request_details,
+                                  request_ended, request_customer_email))
 
             conn.commit()
             conn.close()
             success = "Promotion Updated."
-            
 
-    if(success!=""):
-        promotions_data = get_All_promotion_details(email) 
+    if(success != ""):
+        promotions_data = get_All_promotion_details(email)
 
-    return render_template('vendor_promos.html', home_url="/home/vendor/" + email,itemData=promotions_data, success=success, error=error)
-    
+    return render_template('vendor_promos.html', home_url="/home/vendor/" + email, itemData=promotions_data, success=success, error=error)
+
 
 @app.route('/home/vendor/<email>/rent/', methods=['POST', 'GET'])
 def vendor_rent(email):
     success = ""
     error = ""
-    current_rent_list,_ = get_current_rented_details(email)
-    available_rent_list,_ = get_available_locations_times()
+    current_rent_list, _ = get_current_rented_details(email)
+    available_rent_list, _ = get_available_locations_times()
 
     if request.method == 'POST':
         time_ID_to_rent = request.form['ID']
@@ -441,23 +420,22 @@ def vendor_rent(email):
                 cur = conn.cursor()
 
                 cur.execute(
-                '''
+                    '''
                 UPDATE stall 
                 SET rentee_email = ?
                 WHERE time_slot_id = ?;
-                ''',(email, str(time_ID_to_rent)))
-                
+                ''', (email, str(time_ID_to_rent)))
+
                 conn.commit()
                 conn.close()
 
             except:
                 error = str(sys.exc_info()[1])
-            
+
             if error == "":
                 success = "Rented Successfully."
-                current_rent_list,_ = get_current_rented_details(email)
-                available_rent_list,_ = get_available_locations_times()
-
+                current_rent_list, _ = get_current_rented_details(email)
+                available_rent_list, _ = get_available_locations_times()
 
     return render_template('vendor_rent.html', home_url="/home/vendor/" + email, success=success, error=error, current_rent_list=current_rent_list, available_rent_list=available_rent_list)
 
@@ -640,22 +618,24 @@ def remove_time_location(email):
                 conn = sqlite3.connect('IBDMS.db')
                 cur = conn.cursor()
 
-                cur.execute("delete from location where time_slot_id = ?;",(str(time_ID_to_remove),))
-                cur.execute("delete from time_slot where time_slot_id = ?;",(str(time_ID_to_remove),))
-                cur.execute("delete from stall where time_slot_id = ?;",(str(time_ID_to_remove),))
+                cur.execute(
+                    "delete from location where time_slot_id = ?;", (str(time_ID_to_remove),))
+                cur.execute(
+                    "delete from time_slot where time_slot_id = ?;", (str(time_ID_to_remove),))
+                cur.execute("delete from stall where time_slot_id = ?;",
+                            (str(time_ID_to_remove),))
 
                 conn.commit()
                 conn.close()
 
             except:
                 error = str(sys.exc_info()[1])
-            
+
             if error == "":
                 success = "Shop given time slot with id " + \
                     str(time_ID_to_remove) + " removed successfully."
                 list_of_shops_and_times = get_all_shops_with_slots()
                 return render_template('official_remove_time_location.html', home_url="/home/govt_official/" + email, list_of_shops_and_times=list_of_shops_and_times, error=error, success=success)
-           
 
     return render_template('official_remove_time_location.html', home_url="/home/govt_official/" + email, list_of_shops_and_times=list_of_shops_and_times, error=error, success=success)
 
@@ -1215,15 +1195,15 @@ def getAllItems():
 
 
 def get_All_customers_with_promotions(email):
-    
+
     result = []
 
     conn = sqlite3.connect('IBDMS.db')
     cur = conn.cursor()
     cur.execute(
         '''
-            select customer_email from promotions where vendor_email = ?;''' ,(email,)
-            
+            select customer_email from promotions where vendor_email = ?;''', (email,)
+
     )
 
     result = cur.fetchall()
@@ -1233,13 +1213,15 @@ def get_All_customers_with_promotions(email):
 
     return result
 
-#gives only those promotions for vendors that are linked to the given account
+# gives only those promotions for vendors that are linked to the given account
+
+
 def get_All_promotion_details(email):
     result = []
 
     conn = sqlite3.connect('IBDMS.db')
     cur = conn.cursor()
-    cur.execute('''select customer_name, customer_email, details, ended from customer natural left outer join promotions where vendor_email = ?;''' ,(email,))
+    cur.execute('''select customer_name, customer_email, details, ended from customer natural left outer join promotions where vendor_email = ?;''', (email,))
 
     result = cur.fetchall()
 
@@ -1247,6 +1229,7 @@ def get_All_promotion_details(email):
     conn.close()
 
     return result
+
 
 def get_All_customers():
     result = []
@@ -1265,6 +1248,8 @@ def get_All_customers():
     conn.close()
 
     return result
+
+
 def get_current_rented_details(email):
     """
     returns a list of all items.
@@ -1281,7 +1266,7 @@ def get_current_rented_details(email):
         cur = conn.cursor()
 
         cur.execute(
-        '''
+            '''
         SELECT shop_number, start_time, end_time, rent
         FROM time_slot INNER JOIN location INNER JOIN stall
         ON time_slot.time_slot_id = location.time_slot_id and stall.time_slot_id = location.time_slot_id and rentee_email = ?
@@ -1295,8 +1280,9 @@ def get_current_rented_details(email):
 
     except:
         error = str(sys.exc_info()[1])
-    
-    return result,error
+
+    return result, error
+
 
 def get_available_locations_times():
     """
@@ -1313,7 +1299,7 @@ def get_available_locations_times():
         cur = conn.cursor()
 
         cur.execute(
-        '''
+            '''
         SELECT location.time_slot_id, shop_number, start_time, end_time, rent
         FROM time_slot INNER JOIN location INNER JOIN stall
         ON time_slot.time_slot_id = location.time_slot_id and stall.time_slot_id = location.time_slot_id and rentee_email IS NULL
@@ -1327,5 +1313,5 @@ def get_available_locations_times():
 
     except:
         error = str(sys.exc_info()[1])
-    
-    return result,error
+
+    return result, error

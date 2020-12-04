@@ -31,7 +31,7 @@
 16. Delete Stock (vendor)
 17. View Stock (vendor)
 18. Request Items (customer)
-19. TODO: Promotions (vendor)
+19. Promotions (vendor)
 -------------------------------------------
 = 19/23 *100 = 82.6%
 -------------------------------------------
