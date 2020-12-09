@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, url_for, flash, redirect
 import sqlite3
 import sys      # for error catching
 import datetime
-
+from datetime import datetime
 from werkzeug.datastructures import RequestCacheControl
 
 app = Flask(__name__)
@@ -11,6 +11,7 @@ if __name__ == '__main__':
     app.debug = True
     app.run()
 
+sale_id_final = 0
 
 @app.route('/')
 def index():
@@ -434,6 +435,77 @@ def vendor_rent(email):
 
     return render_template('vendor_rent.html', home_url="/home/vendor/" + email, success=success, error=error, current_rent_list=current_rent_list, available_rent_list=available_rent_list)
 
+
+
+@app.route('/home/vendor/<email>/add_sale/', methods=['POST', 'GET'])
+def vendor_add_sale(email):
+
+    error = ""
+    success = ""
+    valid_Stock = False
+    valid_Customer_in_table = False
+    stock = []
+    global sale_id_final
+    sale_id = []
+
+    if request.method == 'POST':
+        request_customer_email = request.form['customer_email']
+        request_item_name = request.form['item_name']
+        request_quantity = request.form['quantity']
+        request_price = request.form['price']
+
+        request_discount = request.form['discount']
+
+        stock = get_stock(email, request_item_name)
+
+        if not stock:
+            error = "The Item is not in your stock"
+            return render_template('vendor_add_sale.html', home_url="/home/vendor/" + email, success=success, error=error)
+
+        if float(request_quantity) > stock[0][1]:
+            error = "The Requested Quantity of the item is greater than the quantity of the item in your stock."
+            return render_template('vendor_add_sale.html', home_url="/home/vendor/" + email, success=success, error=error)
+
+        all_customer_emails = get_All_customers()
+        for currRow in all_customer_emails:
+            tempName = currRow[0]
+            if tempName == request_customer_email:
+                valid_Customer_in_table = True
+                break
+
+        if valid_Customer_in_table == False:
+            error = "The Customer is not registered in the database"
+            return render_template('vendor_add_sale.html', home_url="/home/vendor/" + email, success=success, error=error)
+
+        conn = sqlite3.connect('IBDMS.db')
+        cur = conn.cursor()
+
+        myQuery1 = """UPDATE overall_stock SET quantity = ? WHERE vendor_email = ? and item_name = ?"""
+        cur.execute(myQuery1, ( stock[0][1]- float(request_quantity) , email, request_item_name))
+
+        conn.commit()
+        conn.close()
+
+
+        
+        sale_id_final = sale_id_final + 1
+
+        conn = sqlite3.connect('IBDMS.db')
+        cur = conn.cursor()
+        now = datetime.now()
+        dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+
+        
+        myQuery3 = """INSERT INTO sales (sales_id, item_name, vendor_email, quantity, price, discount, time_stamp, customer_email) VALUES ( ?,?,?,?,?,?,?,?)"""
+        cur.execute(myQuery3, ( sale_id_final, request_item_name, email, request_quantity, request_price, request_discount, dt_string, request_customer_email))
+   
+        conn.commit()
+        conn.close()
+        success = "New Sale Added."
+
+    return render_template('vendor_add_sale.html', home_url="/home/vendor/" + email, success=success, error=error)
+
+
 # Customer Screens:
 
 
@@ -579,17 +651,6 @@ def customer_req_items(email):
 
     return render_template('customer_req_item.html', home_url="/home/customer/" + email, success=success, error=error)
 
-
-@app.route('/home/customer/<email>/cart/', methods=['POST', 'GET'])
-def customer_cart(email):
-    # TODO
-    error = ""
-    success = ""
-
-    if request.method == 'POST':
-        pass
-
-    return render_template('customer_cart.html', home_url="/home/customer/" + email, success=success, error=error)
 
 # Govt Official screens:
 
@@ -1354,3 +1415,20 @@ def get_available_locations_times():
         error = str(sys.exc_info()[1])
 
     return result, error
+
+def get_stock(email, item_name):
+    result = []
+
+    conn = sqlite3.connect('IBDMS.db')
+    cur = conn.cursor()
+    myQuery = """select item_name, quantity from overall_stock where vendor_email = ? and item_name = ?;"""
+    #myQuery = """SELECT item_name, quantity (sales_id, item_name, vendor_email, quantity, price, discount, time_stamp, customer_email) VALUES ( ?,?,?,?,?,?,?)"""
+
+    cur.execute(myQuery , (email, item_name))
+
+    result = cur.fetchall()
+
+    conn.commit()
+    conn.close()
+
+    return result

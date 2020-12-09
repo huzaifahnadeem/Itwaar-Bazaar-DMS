@@ -51,9 +51,9 @@
               class="btn btn-outline-success my-2 my-sm-0">Manage Promotions</button></a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{{home_url}}/add_sale/"><button
-              class="btn btn-outline-success my-2 my-sm-0">Add Sale</button></a>
-      </li>
+            <a class="nav-link" href="{{home_url}}/add_sale/"><button
+                class="btn btn-outline-success my-2 my-sm-0">Add Sale</button></a>
+        </li>
         <li class="nav-item">
           <a class="nav-link" href="{{home_url}}/rent/"><button class="btn btn-outline-success my-2 my-sm-0">Rent A
               Location</button></a>
@@ -63,66 +63,65 @@
     </div>
   </nav>
 
+
+   
   <main role="main" class="container">
 
     <div class="starter-template">
-      <h1>Currently Rented Location and time for stall:</h1>
-      <table class="table table-striped">
-        <tr>
-          <th>Shop Number</th>
-          <th>Start Time</th>
-          <th>End Time</th>
-          <th>Rent</th>
-        </tr>
+      <h1>
+        {%if success != "" %}
+        <p class="text-success">{{ success }}</p>
+        {% endif %}
 
-        {% for i in current_rent_list %}
-        <tr>
-          {% for j in i %}
-            <td> {{j}} </td>
-          {% endfor %}
-        </tr>
-        {% endfor %}
+        {%if error != "" %}
+        <p class="text-danger">{{ error }}</p>
+        {% endif %}
 
-      </table>
+        <form method="post">
 
-      <form class="form-signin" method = "POST">
-        <h1 class="h3 mb-3 font-weight-bold">Enter the ID from the list to rent:</h1>
+          <h1 class="h3 mb-3 font-weight-normal">Add Sale</h1>
+          <!--The for attribute of <label> must be equal to the id attribute of the related element to bind them together.-->
+          <!--for & id should be same so that they are binded together-->
+          <!--name of input is used when pasing this form in app.py-->
+
+          <label for="customer_email" class="sr-only">Customer Email</label>
+          <input type="text" name="customer_email" id="customer_email" class="form-control"
+            placeholder="Customer Email..." required autofocus>
+
+          <label for="item_name" class="sr-only">Item Name</label>
+          <input type="text" name="item_name" id="item_name" class="form-control"
+            placeholder="Item Name..." required autofocus>
         
-        <label for="ID_input" class="badge">ID:</label>
-        <input type="number" onkeypress="return event.charCode >= 48" min="0" name="ID" id="ID_input" placeholder="ID" class="form-control" required autofocus>
-          
-        <button class="btn btn-lg btn-success btn-block" type="submit">Rent</button>
+            <label for="quantity" class="sr-only">Quantity</label>
+            <input type="text" name="quantity" id="quantity" class="form-control"
+              placeholder="Quantity..." required autofocus>
+  
+            <label for="price" class="sr-only">Price (after discount)</label>
+            <input type="text" name="price" id="price" class="form-control"
+                placeholder="Price (after discount)..." required autofocus>
+            <label for="discount" class="sr-only">Discount</label>
+            <input type="text" name="discount" id="discount" class="form-control"
+                  placeholder="Discount..." required autofocus>
+      
+              
+    
+
+
+
+          <button class="btn btn-lg btn-success btn-block" type="submit">SUBMIT</button>
+        </form>
+   
         
-        <p class="text-danger">{{ error }}</p> 
-        <p class="text-success">{{ success }}</p>  
-      </form>
 
-      <h1>Available Locations and times for stall:</h1>
-      <table class="table table-striped">
-        <tr>
-          <th>ID</th>
-          <th>Shop Number</th>
-          <th>Start Time</th>
-          <th>End Time</th>
-          <th>Rent</th>
-        </tr>
-
-        {% for i in available_rent_list %}
-        <tr>
-          {% for j in i %}
-            <td> {{j}} </td>
-          {% endfor %}
-        </tr>
-        {% endfor %}
-
-      </table>
+      </h1>
     </div>
 
   </main>
 
-  <!-- javascript -->
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-  <script>window.jQuery || document.write('<script src="../assets/js/vendor/jquery.slim.min.js"><\/script>')</script>
-  <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+    <!-- javascript -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script>window.jQuery || document.write('<script src="../assets/js/vendor/jquery.slim.min.js"><\/script>')</script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 
 </html>
