@@ -62,13 +62,14 @@
   <main role="main" class="container">
 
     <div class="starter-template">
-      <h1>
-        <table class="table table-striped">
+      <h1 class="h3 mb-3 font-weight-normal">Sales</h1>
+      <!--print allItems list argument....each element of list is a complete row(in a tuple) -->
+      <!--CONVERT THIS PRINT INTO A GOOD LOOKING TABLE-->
+      <table class="table table-striped">
           <tr>
             <!-- <th>Item ID</th> -->
             <th>Sales ID</th>
             <th>Item Name </th>
-            <th>Vendor Email</th>
             <th>Quantity</th>
             <th>Price</th>
             <th>Discount</th>
@@ -83,7 +84,6 @@
             {% endfor %}
           </tr>
           {% endfor %}
-  
         </table>
       </h1>
     </div>

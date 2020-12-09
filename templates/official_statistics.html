@@ -48,7 +48,31 @@
 <main role="main" class="container">
 
   <div class="starter-template">
-    <h1>TODO</h1>
+    <h1>
+      <h1 class="h3 mb-3 font-weight-normal">Statistics</h1>
+      <!--print allItems list argument....each element of list is a complete row(in a tuple) -->
+      <!--CONVERT THIS PRINT INTO A GOOD LOOKING TABLE-->
+   
+      <table class="table table-striped">
+        <tr>
+          <!-- <th>Item ID</th> -->
+          <th>Item Name</th>
+          <th>Average Selling Price (PKR)</th>
+          <th>Total Quantity in market</th>
+          <th>Number of vendors selling the item</th>
+        </tr>
+
+        {% for currTuple in itemData %}
+        <tr>
+          {% for currElement in currTuple %}
+          <td> {{currElement}} </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+
+      </table>
+    </h1>
+    </h1>
   </div>
 
 </main>

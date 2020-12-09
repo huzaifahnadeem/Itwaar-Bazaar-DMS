@@ -42,7 +42,53 @@
 <main role="main" class="container">
 
   <div class="starter-template">
-    <h1>TODO</h1>
+    <h1>
+
+      {%if success != "" %}
+      <p class="text-success">{{ success }}</p>
+      {% endif %}
+
+      {%if error != "" %}
+      <p class="text-danger">{{ error }}</p>
+      {% endif %}
+      <form method="post">
+
+        <h1 class="h3 mb-3 font-weight-normal">Search Items</h1>
+        <!--The for attribute of <label> must be equal to the id attribute of the related element to bind them together.-->
+        <!--for & id should be same so that they are binded together-->
+        <!--name of input is used when pasing this form in app.py-->
+
+        <label for="itemName" class="badge">Item Name</label>
+        <input type="text" name="itemName" id="itemName" class="form-control" placeholder="Item Name..." required
+          autofocus>
+
+        <button class="btn btn-lg btn-success btn-block" type="submit">SEARCH</button>
+      </form>
+
+      <h1 class="h3 mb-3 font-weight-normal">Items</h1>
+        <!--print allItems list argument....each element of list is a complete row(in a tuple) -->
+        <!--CONVERT THIS PRINT INTO A GOOD LOOKING TABLE-->
+     
+        <table class="table table-striped">
+          <tr>
+            <!-- <th>Item ID</th> -->
+            <th>Item Name</th>
+            <th>Vendor Email</th>
+            <th>Selling Price (PKR)</th>
+          </tr>
+  
+          {% for currTuple in itemData %}
+          <tr>
+            {% for currElement in currTuple %}
+            <td> {{currElement}} </td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+  
+        </table>
+
+      </h1>
+    </h1>
   </div>
 
 </main>

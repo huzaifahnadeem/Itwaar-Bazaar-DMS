@@ -295,34 +295,29 @@ def vendor_stock_remove(email):
 
 @app.route('/home/vendor/<email>/view_sales/', methods=['POST', 'GET'])
 def vendor_sales(email):
-    # TODO
+    
     error = ""
     success = ""
-    abcd = ['blah']
-    print(abcd.count('blah'))
+    query = []
+    
+    
+    conn = sqlite3.connect('IBDMS.db')
+    cur = conn.cursor()
+    cur.execute(''' select sales_id,item_name,quantity,price,discount,time_stamp,customer_email from sales where vendor_email = ?;''', (email, ))
 
+    query = cur.fetchall()
+
+    conn.commit()
+    conn.close()
     if request.method == 'POST':
+        pass
+        
+        
 
-        print(abcd.count('blah'))
+        
+      
 
-        conn = sqlite3.connect('IBDMS.db')
-        cur = conn.cursor()
-        cur.execute(
-            '''
-            select* from sales;
-            '''
-        )
-
-        abcd = cur.fetchall()
-
-        conn.commit()
-        conn.close()
-        print(abcd.count())
-        if abcd.count() == 4:
-            error = "No sales yet"
-            return render_template('vendor_sales.html', home_url="/home/vendor/" + email, success=success, error=error)
-
-    return render_template('vendor_sales.html', home_url="/home/vendor/" + email, itemData=abcd, success=success, error=error)
+    return render_template('vendor_sales.html', home_url="/home/vendor/" + email, itemData=query, success=success, error=error)
 
 
 @app.route('/home/vendor/<email>/promotions/', methods=['POST', 'GET'])
@@ -444,14 +439,44 @@ def vendor_rent(email):
 
 @app.route('/home/customer/<email>/search_items/', methods=['POST', 'GET'])
 def customer_search_items(email):
-    # TODO
+   
     error = ""
     success = ""
-
+    
+    result = []
+    items = []
+    items = getAllItems()
     if request.method == 'POST':
-        pass
+        
+        requestItemName = request.form['itemName']
 
-    return render_template('customer_search_item.html', home_url="/home/customer/" + email, success=success, error=error)
+        validItemName = False
+        for currRow in items:
+            tempName = currRow[0]
+            if tempName == requestItemName:
+                validItemName = True
+                break
+        
+        if validItemName == False:
+            error = "No such item exists"
+            return render_template('customer_search_item.html', home_url="/home/customer/" + email, success=success, error=error)
+        
+        if validItemName == True:
+
+            conn = sqlite3.connect('IBDMS.db')
+            cur = conn.cursor()
+
+            myquery = """ select item_name, vendor_email, selling_price from overall_stock where item_name = ?; """
+            cur.execute(myquery, (requestItemName,))
+            result = cur.fetchall()
+            conn.commit()
+            conn.close()
+   
+
+        
+
+
+    return render_template('customer_search_item.html', home_url="/home/customer/" + email, itemData= result,success=success, error=error)
 
 
 @app.route('/home/customer/<email>/req_items/', methods=['POST', 'GET'])
@@ -717,8 +742,22 @@ def price_bounds(email):
 
 @app.route('/home/govt_official/<email>/statistics/', methods=['POST', 'GET'])
 def statistics(email):
-    # TODO
-    return render_template('official_statistics.html', home_url="/home/govt_official/" + email)
+    error = ""
+    success = ""
+    query = []
+    
+    
+    conn = sqlite3.connect('IBDMS.db')
+    cur = conn.cursor()
+    cur.execute(''' select item_name, avg(selling_price), sum(quantity), count(item_name) from overall_stock group by item_name''')
+
+    query = cur.fetchall()
+
+    conn.commit()
+    conn.close()
+
+        
+    return render_template('official_statistics.html', home_url="/home/govt_official/" + email,itemData=query, error=error, success=success)
 
 
 @app.route('/home/govt_official/<email>/fines/', methods=['POST', 'GET'])
