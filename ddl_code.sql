@@ -8,7 +8,6 @@ create table stall (
     time_slot_id int,
     location_id int,
     rent numeric(8, 2),
-    -- using numeric(8,2) for currency
     rentee_email varchar(254),
     foreign key (time_slot_id) references time_slot (time_slot_id),
     foreign key (location_id) references location (location_id),
@@ -41,12 +40,10 @@ create table customer (
 );
 create table sales (
     sales_id int,
-    -- item_id int,
     item_name varchar(225),
     vendor_email varchar(254),
     quantity FLOAT,
     price numeric(8, 2),
-    -- before discount i.e. the standard price e.g. per kg
     discount numeric(8, 2),
     time_stamp datetime,
     customer_email varchar(254),
@@ -58,7 +55,6 @@ create table sales (
 create table vendor (
     vendor_name varchar(225),
     vendor_email varchar(254),
-    -- email char length limit according to the relevent standard
     vendor_pass varchar(225),
     location_id int,
     time_slot_id int,
@@ -67,8 +63,6 @@ create table vendor (
     primary key (vendor_email)
 );
 create table items (
-    -- item_id int,
-    --remove , item_name is new primary
     item_name varchar(225),
     item_category varchar(225),
     max_price numeric(8, 2),
@@ -77,8 +71,6 @@ create table items (
     primary key (item_name)
 );
 create table overall_stock (
-    -- overall stock of the itwaar bazaar using each vendor's stock 
-    -- item_id int,
     item_name varchar(225),
     vendor_email varchar(254),
     selling_price numeric(8, 2),
@@ -89,7 +81,6 @@ create table overall_stock (
 );
 create table requests (
     request_id int,
-    -- item_id int,
     item_name varchar(225),
     quantity FLOAT,
     resolved boolean,
@@ -99,14 +90,12 @@ create table requests (
 create table government_officials (
     govt_off_name varchar(225),
     govt_off_email varchar(254),
-    -- email char length limit according to the relevent standard
     govt_off_pass varchar(225),
     primary key (govt_off_email)
 );
 create table db_admins (
     admin_name varchar(225),
     admin_email varchar(254),
-    -- email char length limit according to the relevent standard
     admin_password varchar(225),
     primary key (admin_email)
 );
