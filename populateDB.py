@@ -279,7 +279,7 @@ def populateVendorTable():
     cur = conn.cursor()
 
     # add 200-20 vendors
-    for i in range(1, totalRows - 20):
+    for i in range(1, totalRows - 50):
         # extract i-th row
         name = vendorSheet.cell_value(i, 0)
         email = vendorSheet.cell_value(i, 1)
@@ -408,7 +408,7 @@ def populateStall():
 
             stall_info.append([time_slot_id, id])
 
-            if i > 150:
+            if i >= 150:
                 curr_ven = "NULL"
 
             # print(time_slot_id, id, curr_rent, curr_ven)
