@@ -373,7 +373,7 @@ def populatePromotions():
 
 def populateStall():
 
-    totalLocations = 150
+    totalLocations = 200
 
     # use i for vendor email indexing
     # Give the location of the file
@@ -407,6 +407,9 @@ def populateStall():
             time_slot_id = 2
 
             stall_info.append([time_slot_id, id])
+
+            if i > 150:
+                curr_ven = "NULL"
 
             # print(time_slot_id, id, curr_rent, curr_ven)
             myQuery = """INSERT INTO stall (time_slot_id,location_id,rent,rentee_email) VALUES ( ?,?,?,?)"""
@@ -464,8 +467,21 @@ def populateOverallStock():
     conn.close()
 
 
+def populateDBAdmin():
+
+    conn = sqlite3.connect('IBDMS.db')
+    cur = conn.cursor()
+
+    myQuery = """INSERT INTO db_admins (admin_name,admin_email,admin_password) VALUES ("huzaifah","huz@gmail.com","huz123" )"""
+    cur.execute(myQuery)
+
+    conn.commit()
+    conn.close()
+
+
 def main():
 
+    populateDBAdmin()
     populateGovtOfficial()
     populateCustomer()
     populateTimeSlots()

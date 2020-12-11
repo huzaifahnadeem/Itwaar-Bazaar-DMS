@@ -13,6 +13,7 @@ if __name__ == '__main__':
 
 sale_id_final = 0
 
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -296,12 +297,11 @@ def vendor_stock_remove(email):
 
 @app.route('/home/vendor/<email>/view_sales/', methods=['POST', 'GET'])
 def vendor_sales(email):
-    
+
     error = ""
     success = ""
     query = []
-    
-    
+
     conn = sqlite3.connect('IBDMS.db')
     cur = conn.cursor()
     cur.execute(''' select sales_id,item_name,quantity,price,discount,time_stamp,customer_email from sales where vendor_email = ?;''', (email, ))
@@ -312,11 +312,6 @@ def vendor_sales(email):
     conn.close()
     if request.method == 'POST':
         pass
-        
-        
-
-        
-      
 
     return render_template('vendor_sales.html', home_url="/home/vendor/" + email, itemData=query, success=success, error=error)
 
@@ -436,7 +431,6 @@ def vendor_rent(email):
     return render_template('vendor_rent.html', home_url="/home/vendor/" + email, success=success, error=error, current_rent_list=current_rent_list, available_rent_list=available_rent_list)
 
 
-
 @app.route('/home/vendor/<email>/add_sale/', methods=['POST', 'GET'])
 def vendor_add_sale(email):
 
@@ -481,13 +475,12 @@ def vendor_add_sale(email):
         cur = conn.cursor()
 
         myQuery1 = """UPDATE overall_stock SET quantity = ? WHERE vendor_email = ? and item_name = ?"""
-        cur.execute(myQuery1, ( stock[0][1]- float(request_quantity) , email, request_item_name))
+        cur.execute(
+            myQuery1, (stock[0][1] - float(request_quantity), email, request_item_name))
 
         conn.commit()
         conn.close()
 
-
-        
         sale_id_final = sale_id_final + 1
 
         conn = sqlite3.connect('IBDMS.db')
@@ -495,10 +488,10 @@ def vendor_add_sale(email):
         now = datetime.now()
         dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
 
-        
         myQuery3 = """INSERT INTO sales (sales_id, item_name, vendor_email, quantity, price, discount, time_stamp, customer_email) VALUES ( ?,?,?,?,?,?,?,?)"""
-        cur.execute(myQuery3, ( sale_id_final, request_item_name, email, request_quantity, request_price, request_discount, dt_string, request_customer_email))
-   
+        cur.execute(myQuery3, (sale_id_final, request_item_name, email, request_quantity,
+                               request_price, request_discount, dt_string, request_customer_email))
+
         conn.commit()
         conn.close()
         success = "New Sale Added."
@@ -511,15 +504,15 @@ def vendor_add_sale(email):
 
 @app.route('/home/customer/<email>/search_items/', methods=['POST', 'GET'])
 def customer_search_items(email):
-   
+
     error = ""
     success = ""
-    
+
     result = []
     items = []
     items = getAllItems()
     if request.method == 'POST':
-        
+
         requestItemName = request.form['itemName']
 
         validItemName = False
@@ -528,11 +521,11 @@ def customer_search_items(email):
             if tempName == requestItemName:
                 validItemName = True
                 break
-        
+
         if validItemName == False:
             error = "No such item exists"
             return render_template('customer_search_item.html', home_url="/home/customer/" + email, success=success, error=error)
-        
+
         if validItemName == True:
 
             conn = sqlite3.connect('IBDMS.db')
@@ -543,12 +536,8 @@ def customer_search_items(email):
             result = cur.fetchall()
             conn.commit()
             conn.close()
-   
 
-        
-
-
-    return render_template('customer_search_item.html', home_url="/home/customer/" + email, itemData= result,success=success, error=error)
+    return render_template('customer_search_item.html', home_url="/home/customer/" + email, itemData=result, success=success, error=error)
 
 
 @app.route('/home/customer/<email>/req_items/', methods=['POST', 'GET'])
@@ -587,7 +576,8 @@ def customer_req_items(email):
         conn.close()
         currentQuantityAvailable = resultTuple[0]
 
-        if currentQuantityAvailable >= requestQuantity:  # if yes then give error that you can buy the requested quantity from the list of vendors selling this item with this much of current quanitty available
+        # if yes then give error that you can buy the requested quantity from the list of vendors selling this item with this much of current quanitty available
+        if currentQuantityAvailable != None and currentQuantityAvailable >= requestQuantity:
             error = "Requested quantity already available in Itwaar Bazaar !"
             quantityAvailable = True
             # get vendor details who is selling and what quantity
@@ -596,15 +586,6 @@ def customer_req_items(email):
 
             conn = sqlite3.connect('IBDMS.db')
             cur = conn.cursor()
-
-            # myQuery = """ SELECT
-            #                 vendor.vendor_name ,overall_stock.selling_price ,overall_stock.quantity,location.shop_number,location.x_coordinate,location.y_coordinate,time_slot.start_time,time_slot.end_time
-            #             FROM
-            #                 vendor cross join overall_stock ON vendor.vendor_email = overall_stock.vendor_email
-            #                 cross join location ON  vendor.location_id = location.location_id
-            #                 cross join time_slot ON location.time_slot_id = time_slot.time_slot_id
-            #             where
-            #                 overall_stock.quantity > 0 And overall_stock.item_name = ?"""
 
             myQuery = """ SELECT
                             vendor.vendor_name,vendor.vendor_email ,overall_stock.selling_price ,overall_stock.quantity
@@ -806,19 +787,18 @@ def statistics(email):
     error = ""
     success = ""
     query = []
-    
-    
+
     conn = sqlite3.connect('IBDMS.db')
     cur = conn.cursor()
-    cur.execute(''' select item_name, avg(selling_price), sum(quantity), count(item_name) from overall_stock group by item_name''')
+    cur.execute(
+        ''' select item_name, avg(selling_price), sum(quantity), count(item_name) from overall_stock group by item_name''')
 
     query = cur.fetchall()
 
     conn.commit()
     conn.close()
 
-        
-    return render_template('official_statistics.html', home_url="/home/govt_official/" + email,itemData=query, error=error, success=success)
+    return render_template('official_statistics.html', home_url="/home/govt_official/" + email, itemData=query, error=error, success=success)
 
 
 @app.route('/home/govt_official/<email>/fines/', methods=['POST', 'GET'])
@@ -1416,6 +1396,7 @@ def get_available_locations_times():
 
     return result, error
 
+
 def get_stock(email, item_name):
     result = []
 
@@ -1424,7 +1405,7 @@ def get_stock(email, item_name):
     myQuery = """select item_name, quantity from overall_stock where vendor_email = ? and item_name = ?;"""
     #myQuery = """SELECT item_name, quantity (sales_id, item_name, vendor_email, quantity, price, discount, time_stamp, customer_email) VALUES ( ?,?,?,?,?,?,?)"""
 
-    cur.execute(myQuery , (email, item_name))
+    cur.execute(myQuery, (email, item_name))
 
     result = cur.fetchall()
 
