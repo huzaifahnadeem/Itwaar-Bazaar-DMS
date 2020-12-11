@@ -1247,7 +1247,7 @@ def insert_location_time(st_time, en_time, shop_num_str, rent):
         cur.execute(
             '''
         INSERT INTO stall (location_id, rent, time_slot_id)
-        VALUES (?, ?, ?);
+        VALUES (?, ?, ?) ;
         ''', (this_location_id, rent, this_time_slot_id)
         )
 
