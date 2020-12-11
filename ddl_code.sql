@@ -80,7 +80,7 @@ create table stall (
     time_slot_id int NOT NULL,
     location_id int NOT NULL,
     rent numeric(8, 2) NOT NULL,
-    rentee_email varchar(254) NOT NULL,
+    rentee_email varchar(254) DEFAULT NULL,
     foreign key (time_slot_id) references time_slot (time_slot_id),
     foreign key (location_id) references location (location_id),
     foreign key (rentee_email) references vendor (vendor_email),
