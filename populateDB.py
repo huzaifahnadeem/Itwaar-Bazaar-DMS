@@ -409,7 +409,7 @@ def populateStall():
             stall_info.append([time_slot_id, id])
 
             if i >= 150:
-                curr_ven = "NULL"
+                curr_ven = None
 
             # print(time_slot_id, id, curr_rent, curr_ven)
             myQuery = """INSERT INTO stall (time_slot_id,location_id,rent,rentee_email) VALUES ( ?,?,?,?)"""
