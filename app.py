@@ -11,7 +11,7 @@ if __name__ == '__main__':
     app.debug = True
     app.run()
 
-sale_id_final = 0
+
 
 @app.route('/')
 def index():
@@ -351,7 +351,7 @@ def vendor_promotions(email):
 
         if valid_Customer_in_table == False:
             error = "No Customer registered with this account"
-            return render_template('vendor_promos.html', home_url="/home/vendor/<email>/promotions/" + email, itemData=promotions_data,   success=success, error=error)
+            return render_template('vendor_promos.html', home_url="/home/vendor/" + email, itemData=promotions_data, success=success, error=error)
 
         all_customer_emails = get_All_customers_with_promotions(email)
         for currRow in all_customer_emails:
@@ -486,9 +486,13 @@ def vendor_add_sale(email):
         conn.commit()
         conn.close()
 
+         # compute Sales ID
+        myQuery = "select COALESCE(MAX(sale_id), 0) from sales"
+        _, tempResult, error = execute_query(myQuery)
+        sale_id_final = tempResult[0][0] + 1
 
         
-        sale_id_final = sale_id_final + 1
+
 
         conn = sqlite3.connect('IBDMS.db')
         cur = conn.cursor()
