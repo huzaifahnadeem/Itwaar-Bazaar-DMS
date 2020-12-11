@@ -136,8 +136,18 @@ def vendor_stock_add(email):
 
     if request.method == 'POST':
         requestItemName = request.form['itemName']
-        requestSellingPrice = float(request.form['sellingPrice'])
-        requestQuantity = float(request.form['quantity'])
+        try:
+            requestSellingPrice = float(request.form['sellingPrice'])
+
+        except:
+            error = "invalid selling price"
+            return render_template('vendor_stock_add.html', home_url="/home/vendor/" + email, itemData=allItems, success=success, error=error)
+
+        try:
+            requestQuantity = float(request.form['quantity'])
+        except:
+            error = "invalid quantity"
+            return render_template('vendor_stock_add.html', home_url="/home/vendor/" + email, itemData=allItems, success=success, error=error)
 
         if requestQuantity <= 0:
             error = "Quantity should be a positive value."
@@ -391,12 +401,12 @@ def vendor_rent(email):
     available_rent_list, _ = get_available_locations_times()
 
     if request.method == 'POST':
-        time_ID_to_rent = request.form['ID']
+        location_ID_to_rent = request.form['ID']
 
         exists = False
         for i in available_rent_list:
             for j in i:
-                if str(j) == str(time_ID_to_rent):
+                if str(j) == str(location_ID_to_rent):
                     exists = True
 
         if exists == False:
@@ -410,8 +420,8 @@ def vendor_rent(email):
                     '''
                 UPDATE stall 
                 SET rentee_email = ?
-                WHERE time_slot_id = ?;
-                ''', (email, str(time_ID_to_rent)))
+                WHERE location_id = ?;
+                ''', (email, str(location_ID_to_rent)))
 
                 conn.commit()
                 conn.close()
@@ -442,6 +452,7 @@ def vendor_add_sale(email):
         request_customer_email = request.form['customer_email']
         request_item_name = request.form['item_name']
         request_quantity = request.form['quantity']
+
         request_price = request.form['price']
 
         request_discount = request.form['discount']
@@ -478,8 +489,9 @@ def vendor_add_sale(email):
         conn.close()
 
         # compute Sales ID
-        myQuery = "select COALESCE(MAX(sale_id), 0) from sales"
+        myQuery = "select COALESCE(MAX(sales_id), 0) from sales"
         _, tempResult, error = execute_query(myQuery)
+
         sale_id_final = tempResult[0][0] + 1
 
         conn = sqlite3.connect('IBDMS.db')
@@ -1370,8 +1382,8 @@ def get_current_rented_details(email):
             '''
         SELECT shop_number, start_time, end_time, rent
         FROM time_slot INNER JOIN location INNER JOIN stall
-        ON time_slot.time_slot_id = location.time_slot_id and stall.time_slot_id = location.time_slot_id and rentee_email = ?
-        ORDER BY location.time_slot_id;
+        ON time_slot.time_slot_id = location.time_slot_id and stall.location_id = location.location_id and rentee_email = ?
+        ORDER BY shop_number;
         ''', (email,))
 
         result = cur.fetchall()
@@ -1401,10 +1413,10 @@ def get_available_locations_times():
 
         cur.execute(
             '''
-        SELECT location.time_slot_id, shop_number, start_time, end_time, rent
+        SELECT location.location_id, shop_number, start_time, end_time, rent
         FROM time_slot INNER JOIN location INNER JOIN stall
-        ON time_slot.time_slot_id = location.time_slot_id and stall.time_slot_id = location.time_slot_id and rentee_email IS NULL
-        ORDER BY location.time_slot_id;
+        ON time_slot.time_slot_id = location.time_slot_id and stall.location_id = location.location_id and rentee_email IS NULL
+        ORDER BY location.location_id;
         ''')
 
         result = cur.fetchall()
