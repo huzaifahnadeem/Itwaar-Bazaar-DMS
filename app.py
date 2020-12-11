@@ -1,15 +1,13 @@
-from flask import Flask, render_template, request, url_for, flash, redirect
+from flask import Flask, render_template, request, url_for, redirect
 import sqlite3
 import sys      # for error catching
-import datetime
 from datetime import datetime
-from werkzeug.datastructures import RequestCacheControl
 
 app = Flask(__name__)
 
-if __name__ == '__main__':
-    app.debug = True
-    app.run()
+# if __name__ == '__main__':
+#     app.debug = True
+#     app.run()
 
 
 
@@ -670,9 +668,9 @@ def add_time_location(email):
         en_time = request.form['en-time']
         rent = request.form['rent']
 
-        start_time = datetime.datetime.strptime(
+        start_time = datetime.strptime(
             st_time, "%H:%M")  # convert string to time
-        end_time = datetime.datetime.strptime(en_time, "%H:%M")
+        end_time = datetime.strptime(en_time, "%H:%M")
         diff = end_time - start_time
         delta = diff.total_seconds()
 
@@ -699,7 +697,7 @@ def remove_time_location(email):
         exists = False
         for i in list_of_shops_and_times:
             for j in i:
-                if j[0] == int(time_ID_to_remove):
+                if j[0] == int(loc_ID_to_remove):
                     exists = True
         if exists == False:
             error = "The entered ID does not exist. "
@@ -709,11 +707,10 @@ def remove_time_location(email):
                 cur = conn.cursor()
 
                 cur.execute(
-                    "delete from location where time_slot_id = ?;", (str(time_ID_to_remove),))
-                cur.execute(
-                    "delete from time_slot where time_slot_id = ?;", (str(time_ID_to_remove),))
-                cur.execute("delete from stall where time_slot_id = ?;",
-                            (str(time_ID_to_remove),))
+                    "delete from location where location_id = ?;", (str(loc_ID_to_remove),))
+                
+                cur.execute("delete from stall where location_id = ?;",
+                            (str(loc_ID_to_remove),))
 
                 conn.commit()
                 conn.close()
@@ -723,7 +720,7 @@ def remove_time_location(email):
 
             if error == "":
                 success = "Shop given time slot with id " + \
-                    str(time_ID_to_remove) + " removed successfully."
+                    str(loc_ID_to_remove) + " removed successfully."
                 list_of_shops_and_times = get_all_shops_with_slots()
                 return render_template('official_remove_time_location.html', home_url="/home/govt_official/" + email, list_of_shops_and_times=list_of_shops_and_times, error=error, success=success)
 
@@ -897,11 +894,11 @@ def add_officials(email):
     # accounts_list = all_official_accounts()
     if request.method == 'POST':
         name = request.form['name']
-        email = request.form['email']
+        email_off = request.form['email']
         password = request.form['password']
         acc_type = "govt_official"
 
-        added = add_account(name, email, password, acc_type)
+        added = add_account(name, email_off, password, acc_type)
         if added == True:
             success = "Account Added Successfully."
         else:
@@ -923,7 +920,14 @@ def remove_officials(email):
 
         query = 'delete from government_officials where govt_off_email = "' + \
             email_to_remove + '";'
-        execute_query(query)
+        
+        conn = sqlite3.connect('IBDMS.db')
+        cur = conn.cursor()
+
+        cur.execute(query)
+
+        conn.commit()
+        conn.close()
 
         message = 'Account with email "' + email_to_remove + '" has been removed.'
         accounts_list = all_accounts("govt_official")
@@ -1193,27 +1197,43 @@ def insert_location_time(st_time, en_time, shop_num_str, rent):
             this_location_id = 0
         else:
             this_location_id = int(this_location_id[0][0]) + 1
-
+        
+        time_slot_already_exists = False
         cur.execute(
-            '''
-        SELECT MAX(time_slot_id)
-        FROM time_slot;
-        '''
-        )
-        this_time_slot_id = cur.fetchall()
-        if this_time_slot_id[0][0] == None:
-            this_time_slot_id = 0
+                '''
+            SELECT time_slot_id
+            FROM time_slot
+            WHERE start_time = ? AND end_time = ? ;
+            ''', (st_time, en_time)
+            )
+        existing_time_id = cur.fetchall()
+        if len(existing_time_id) == 0:
+            time_slot_already_exists = False
         else:
-            this_time_slot_id = int(this_time_slot_id[0][0]) + 1
+            time_slot_already_exists = True
 
-        cur.execute(
+        if time_slot_already_exists == False:
+            cur.execute(
+                '''
+            SELECT MAX(time_slot_id)
+            FROM time_slot;
             '''
-        INSERT INTO time_slot (time_slot_id, start_time, end_time)
-        VALUES (?, ?, ?);
-        ''', (this_time_slot_id, st_time, en_time)
-        )
-
-        query_result.append(cur.fetchall())
+            )
+            this_time_slot_id = cur.fetchall()
+            if this_time_slot_id[0][0] == None:
+                this_time_slot_id = 0
+            else:
+                this_time_slot_id = int(this_time_slot_id[0][0]) + 1
+            cur.execute(
+                '''
+            INSERT INTO time_slot (time_slot_id, start_time, end_time)
+            VALUES (?, ?, ?);
+            ''', (this_time_slot_id, st_time, en_time)
+            )
+            query_result.append(cur.fetchall())
+        else:
+            # get the relavant time slot id from the time slot table
+            this_time_slot_id = existing_time_id[0][0]
 
         cur.execute(
             '''
@@ -1257,10 +1277,10 @@ def get_all_shops_with_slots():
 
         cur.execute(
             '''
-        SELECT location.time_slot_id, shop_number, start_time, end_time, rent, rentee_email
+        SELECT location.location_id, shop_number, start_time, end_time, rent, rentee_email
         FROM time_slot INNER JOIN location INNER JOIN stall
-        ON time_slot.time_slot_id = location.time_slot_id and stall.time_slot_id = location.time_slot_id
-        ORDER BY location.time_slot_id;
+        ON time_slot.time_slot_id = location.time_slot_id and stall.location_id = location.location_id
+        ORDER BY location.location_id;
         '''
         )
 
