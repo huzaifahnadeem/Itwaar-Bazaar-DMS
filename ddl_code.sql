@@ -1,111 +1,111 @@
+create table db_admins (
+    admin_name varchar(225) NOT NULL,
+    admin_email varchar(254) NOT NULL,
+    admin_password varchar(225) NOT NULL,
+    primary key (admin_email)
+);
+create table government_officials (
+    govt_off_name varchar(225) NOT NULL,
+    govt_off_email varchar(254) NOT NULL,
+    govt_off_pass varchar(225) NOT NULL,
+    primary key (govt_off_email)
+);
+create table customer (
+    customer_name varchar(225) NOT NULL,
+    customer_email varchar(254) NOT NULL,
+    customer_pass varchar(225) NOT NULL,
+    primary key (customer_email)
+);
 create table time_slot (
-    time_slot_id int,
-    start_time time,
-    end_time time,
+    time_slot_id int NOT NULL,
+    start_time time NOT NULL,
+    end_time time NOT NULL,
     primary key (time_slot_id)
 );
+create table items (
+    item_name varchar(225) NOT NULL,
+    item_category varchar(225) NOT NULL,
+    max_price numeric(8, 2) NOT NULL,
+    min_price numeric(8, 2) NOT NULL,
+    item_units varchar(225) NOT NULL,
+    primary key (item_name)
+);
+create table location (
+    location_id int NOT NULL,
+    x_coordinate real DEFAULT NULL,
+    y_coordinate real DEFAULT NULL,
+    shop_number int NOT NULL,
+    time_slot_id int NOT NULL,
+    primary key (location_id),
+    foreign key (time_slot_id) references time_slot (time_slot_id)
+);
+create table requests (
+    request_id int NOT NULL,
+    item_name varchar(225) NOT NULL,
+    quantity FLOAT NOT NULL,
+    resolved boolean NOT NULL,
+    foreign key (item_name) references items (item_name),
+    primary key (request_id)
+);
+create table vendor (
+    vendor_name varchar(225) NOT NULL,
+    vendor_email varchar(254) NOT NULL,
+    vendor_pass varchar(225) NOT NULL,
+    location_id int NOT NULL,
+    time_slot_id int NOT NULL,
+    foreign key (location_id) references location (location_id),
+    foreign key (time_slot_id) references time_slot (time_slot_id),
+    primary key (vendor_email)
+);
+create table fines (
+    fine_id int NOT NULL,
+    govt_off_email varchar(254) NOT NULL,
+    vendor_email varchar(254) NOT NULL,
+    details varchar(500) NOT NULL,
+    paid boolean NOT NULL,
+    foreign key (govt_off_email) references government_officials (govt_off_email),
+    foreign key (vendor_email) references vendor (vendor_email),
+    primary key (fine_id)
+);
+create table promotions (
+    customer_email varchar(254) NOT NULL,
+    vendor_email varchar(254) NOT NULL,
+    details varchar(500) NOT NULL,
+    ended varchar(254) NOT NULL,
+    foreign key (customer_email) references customer (customer_email),
+    foreign key (vendor_email) references vendor (vendor_email),
+    primary key (customer_email, vendor_email)
+);
 create table stall (
-    time_slot_id int,
-    location_id int,
-    rent numeric(8, 2),
-    rentee_email varchar(254),
+    time_slot_id int NOT NULL,
+    location_id int NOT NULL,
+    rent numeric(8, 2) NOT NULL,
+    rentee_email varchar(254) NOT NULL,
     foreign key (time_slot_id) references time_slot (time_slot_id),
     foreign key (location_id) references location (location_id),
     foreign key (rentee_email) references vendor (vendor_email),
     primary key (time_slot_id, location_id)
 );
-create table promotions (
-    customer_email varchar(254),
-    vendor_email varchar(254),
-    details varchar(500),
-    ended varchar(254),
-    foreign key (customer_email) references customer (customer_email),
-    foreign key (vendor_email) references vendor (vendor_email),
-    primary key (customer_email, vendor_email)
-);
-create table location (
-    location_id int,
-    x_coordinate real,
-    y_coordinate real,
-    shop_number int,
-    time_slot_id int,
-    primary key (location_id),
-    foreign key (time_slot_id) references time_slot (time_slot_id)
-);
-create table customer (
-    customer_name varchar(225),
-    customer_email varchar(254),
-    customer_pass varchar(225),
-    primary key (customer_email)
-);
-create table sales (
-    sales_id int,
-    item_name varchar(225),
-    vendor_email varchar(254),
-    quantity FLOAT,
-    price numeric(8, 2),
-    discount numeric(8, 2),
-    time_stamp datetime,
-    customer_email varchar(254),
-    foreign key (item_name) references items (item_name),
-    foreign key (vendor_email) references vendor (vendor_email),
-    foreign key (customer_email) references customer (customer_email),
-    primary key(sales_id)
-);
-create table vendor (
-    vendor_name varchar(225),
-    vendor_email varchar(254),
-    vendor_pass varchar(225),
-    location_id int,
-    time_slot_id int,
-    foreign key (location_id) references location (location_id),
-    foreign key (time_slot_id) references time_slot (time_slot_id),
-    primary key (vendor_email)
-);
-create table items (
-    item_name varchar(225),
-    item_category varchar(225),
-    max_price numeric(8, 2),
-    min_price numeric(8, 2),
-    item_units varchar(225),
-    primary key (item_name)
-);
 create table overall_stock (
-    item_name varchar(225),
-    vendor_email varchar(254),
-    selling_price numeric(8, 2),
-    quantity FLOAT,
+    item_name varchar(225) NOT NULL,
+    vendor_email varchar(254) NOT NULL,
+    selling_price numeric(8, 2) NOT NULL,
+    quantity FLOAT NOT NULL,
     foreign key (item_name) references items (item_name),
     foreign key (vendor_email) references vendor (vendor_email),
     primary key (item_name, vendor_email)
 );
-create table requests (
-    request_id int,
-    item_name varchar(225),
-    quantity FLOAT,
-    resolved boolean,
+create table sales (
+    sales_id int NOT NULL,
+    item_name varchar(225) NOT NULL,
+    vendor_email varchar(254) NOT NULL,
+    quantity FLOAT NOT NULL,
+    price numeric(8, 2) NOT NULL,
+    discount numeric(8, 2) NOT NULL,
+    time_stamp datetime NOT NULL,
+    customer_email varchar(254) NOT NULL,
     foreign key (item_name) references items (item_name),
-    primary key (request_id)
-);
-create table government_officials (
-    govt_off_name varchar(225),
-    govt_off_email varchar(254),
-    govt_off_pass varchar(225),
-    primary key (govt_off_email)
-);
-create table db_admins (
-    admin_name varchar(225),
-    admin_email varchar(254),
-    admin_password varchar(225),
-    primary key (admin_email)
-);
-create table fines (
-    fine_id int,
-    govt_off_email varchar(254),
-    vendor_email varchar(254),
-    details varchar(500),
-    paid boolean,
-    foreign key (govt_off_email) references government_officials (govt_off_email),
     foreign key (vendor_email) references vendor (vendor_email),
-    primary key (fine_id)
+    foreign key (customer_email) references customer (customer_email),
+    primary key(sales_id)
 );
